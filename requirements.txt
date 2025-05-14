@@ -6,3 +6,6 @@ fpdf
 python-dotenv
 transformers
 wordcloud
+fitz
+numpy
+pillow
