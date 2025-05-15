@@ -28,7 +28,7 @@ os.makedirs("data", exist_ok=True)
 for file, columns in [
     (USERS_FILE, ["email", "password"]),
     (PAYMENTS_FILE, ["email", "phone", "account_name", "screenshot_name"]),
-    (PREMIUM_USERS_FILE, ["email"])
+    (PREMIUM_USERS_FILE, ["email","status"])
 ]:
     if not os.path.exists(file):
         pd.DataFrame(columns=columns).to_csv(file, index=False)
@@ -196,8 +196,17 @@ with st.sidebar:
 
 # # ---------- MAIN APP ----------
 
+# premium_users_df = pd.read_csv(PREMIUM_USERS_FILE)
+# st.session_state.is_premium = st.session_state.current_user in premium_users_df["email"].values
+
 premium_users_df = pd.read_csv(PREMIUM_USERS_FILE)
-st.session_state.is_premium = st.session_state.current_user in premium_users_df["email"].values
+user_row = premium_users_df[premium_users_df["email"] == st.session_state.current_user]
+
+if not user_row.empty and user_row.iloc[0]["status"].strip().lower() == "verified":
+    st.session_state.is_premium = True
+else:
+    st.session_state.is_premium = False
+
 
 # Tabs for the app
 tabs = [
