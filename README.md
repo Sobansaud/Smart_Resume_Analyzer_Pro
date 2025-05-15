@@ -4,12 +4,10 @@ Developed by: Muhammad Soban Saud
 
 Streamlit Link :- [https://smartresumeanalyzerpro-soban.streamlit.app/]
 
-you are log in to application this email and password (not dashboard)
-email:-sobansaud3@gmail.com
-password:-soban
 
 Dashboard credential :- sobansaud3@gmail.com
 soban123
+
 
 
 Smart Resume Analyzer is a powerful, AI-driven web application that helps job seekers improve their resumes with data-backed suggestions, real-time skill analysis, and premium tools. Developed as part of a $10 Web App Challenge, this project demonstrates a complete system built with Python (OOP), Streamlit,Authentication  and manual payment integration (Easypaisa & JazzCash), offering both free and premium career tools.
