@@ -176,6 +176,24 @@ if not st.session_state.logged_in:
     auth_ui()
     st.stop()
 
+# ---------- SIDEBAR ----------
+with st.sidebar:
+    st.image("static/logo.png.png", width=100)
+    st.markdown("### 👤 User Info")
+    st.write(f"**Logged in as:** {st.session_state.current_user}")
+    
+    if st.session_state.is_premium:
+        st.success("🌟 Premium User")
+    else:
+        st.warning("🔓 Free User")
+
+    st.markdown("---")
+    if st.button("🚪 Logout"):
+        for key in st.session_state.keys():
+            st.session_state[key] = False
+        st.rerun()
+
+
 # # ---------- MAIN APP ----------
 
 premium_users_df = pd.read_csv(PREMIUM_USERS_FILE)
