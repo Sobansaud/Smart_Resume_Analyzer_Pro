@@ -878,119 +878,6 @@ load_dotenv()
 #     return BytesIO(pdf_output)
 
 
-# from fpdf import FPDF
-# from io import BytesIO
-# import os
-# import base64
-# import unicodedata
-# from PIL import Image
-# from tempfile import NamedTemporaryFile
-
-
-# def clean_text(text):
-#     try:
-#         if isinstance(text, list):
-#             return "\n".join(map(lambda s: "• " + str(s).strip(), text))
-#         return unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode("ascii")
-#     except Exception:
-#         return str(text) or ""
-
-
-# def render_pdf_from_data(context):
-#     pdf = FPDF()
-#     pdf.set_auto_page_break(False)  # Manual control
-#     pdf.add_page()
-
-#     epw = pdf.w - 2 * pdf.l_margin
-#     col_width = epw / 2 - 5
-
-#     # Font
-#     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
-#     if not os.path.isfile(font_path):
-#         raise FileNotFoundError(f"Font file not found: {font_path}")
-#     pdf.add_font('DejaVu', '', font_path, uni=True)
-#     pdf.set_font('DejaVu', '', 12)
-
-#     # === Image ===
-#     image_url = context.get("profile_image_url", "")
-#     if image_url.startswith("data:image"):
-#         try:
-#             header, encoded = image_url.split(",", 1)
-#             img_bytes = base64.b64decode(encoded)
-#             img = Image.open(BytesIO(img_bytes))
-#             with NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
-#                 img.save(tmpfile.name)
-#                 pdf.image(tmpfile.name, x=pdf.w / 2 - 20, y=10, w=40, h=40)
-#                 os.unlink(tmpfile.name)
-#         except:
-#             pass
-#     pdf.ln(45)
-
-#     # === Name and Email ===
-#     pdf.set_font('DejaVu', '', 20)
-#     pdf.cell(0, 10, clean_text(context.get("name", "John Doe")), ln=True, align="C")
-#     pdf.set_font('DejaVu', '', 12)
-#     pdf.cell(0, 8, f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
-#     pdf.ln(6)
-
-#     # === Column Separation Line ===
-#     top_y = pdf.get_y()
-#     bottom_y = 280
-#     pdf.set_draw_color(180, 180, 180)
-#     pdf.set_line_width(0.3)
-#     pdf.line(pdf.l_margin + epw / 2, top_y, pdf.l_margin + epw / 2, bottom_y)
-
-#     # === Data ===
-#     left_sections = [
-#         ("About Me", context.get("about_me", ""), False),
-#         ("Skills", context.get("skills", "").split("\n"), True),
-#         ("Education", context.get("education", "").split("\n"), True),
-#         ("Projects", context.get("projects", []), True),
-#     ]
-
-#     right_sections = [
-#         ("Experience", context.get("experience", "").split("\n"), True),
-#         ("Interests", context.get("interests", "").split("\n"), True),
-#         ("Social Links", [
-#             f"{p.capitalize()}: {context.get(p)}"
-#             for p in ["linkedin", "github", "twitter"] if context.get(p)
-#         ], True),
-#     ]
-
-#     y_left = pdf.get_y()
-#     y_right = y_left
-#     x_left = pdf.l_margin
-#     x_right = pdf.l_margin + epw / 2 + 5
-
-#     def draw_section(x, y, title, content, is_list):
-#         pdf.set_xy(x, y)
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(col_width, 8, f"{title}:", ln=True)
-#         pdf.set_font('DejaVu', '', 11)
-#         start_y = pdf.get_y()
-#         pdf.set_x(x)
-
-#         if is_list and isinstance(content, list):
-#             for item in content:
-#                 pdf.set_x(x)
-#                 pdf.multi_cell(col_width, 6, f"• {clean_text(item)}")
-#         else:
-#             pdf.multi_cell(col_width, 6, clean_text(content))
-
-#         return pdf.get_y() + 2
-
-#     # Left column
-#     for title, content, is_list in left_sections:
-#         y_left = draw_section(x_left, y_left, title, content, is_list)
-
-#     # Right column
-#     for title, content, is_list in right_sections:
-#         y_right = draw_section(x_right, y_right, title, content, is_list)
-
-#     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
-#     return BytesIO(pdf_output)
-
-
 from fpdf import FPDF
 from io import BytesIO
 import os
@@ -998,6 +885,7 @@ import base64
 import unicodedata
 from PIL import Image
 from tempfile import NamedTemporaryFile
+
 
 def clean_text(text):
     try:
@@ -1007,73 +895,52 @@ def clean_text(text):
     except Exception:
         return str(text) or ""
 
-class PDF(FPDF):
-    def multi_cell_height(self, w, h, txt):
-        nb = txt.count('\n') + 1
-        cw = self.get_string_width('A')
-        max_chars_per_line = int(w / cw)
-        total_lines = 0
-        for line in txt.split('\n'):
-            length = len(line)
-            lines = length // max_chars_per_line + 1
-            total_lines += lines
-        return total_lines * h
-
-def draw_section(pdf, x, y, col_width, title, content, is_list):
-    pdf.set_xy(x, y)
-    pdf.set_font('DejaVu', '', 15)
-    pdf.set_text_color(0, 0, 100)
-    pdf.cell(col_width, 9, title, ln=True)
-    pdf.set_draw_color(220, 220, 220)
-    pdf.set_line_width(0.4)
-    pdf.line(x, pdf.get_y(), x + col_width, pdf.get_y())
-    pdf.ln(2)
-
-    pdf.set_font('DejaVu', '', 11)
-    pdf.set_text_color(40, 40, 40)
-
-    start_y = pdf.get_y()
-
-    if is_list and isinstance(content, list):
-        for item in content:
-            pdf.set_x(x)
-            pdf.multi_cell(col_width, 6, f"• {clean_text(item)}", border=0)
-    else:
-        pdf.set_x(x)
-        pdf.multi_cell(col_width, 6, clean_text(content), border=0)
-
-    end_y = pdf.get_y()
-    return end_y
-
-def estimate_section_height(pdf, col_width, title, content, is_list):
-    header_height = 9 + 2 + 2  # Title + line + padding
-    pdf.set_font('DejaVu', '', 11)
-    if is_list and isinstance(content, list):
-        text = "\n".join([f"• {clean_text(i)}" for i in content])
-    else:
-        text = clean_text(content)
-    text_height = pdf.multi_cell_height(col_width, 6, text)
-    return header_height + text_height + 5  # + padding
 
 def render_pdf_from_data(context):
-    pdf = PDF()
-    pdf.set_auto_page_break(auto=False)
+    pdf = FPDF()
+    pdf.set_auto_page_break(False)  # Manual control
     pdf.add_page()
 
     epw = pdf.w - 2 * pdf.l_margin
     col_width = epw / 2 - 5
-    page_height = pdf.h - pdf.t_margin - pdf.b_margin
 
-    # Add font (make sure font file exists)
+    # Font
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
+    if not os.path.isfile(font_path):
+        raise FileNotFoundError(f"Font file not found: {font_path}")
     pdf.add_font('DejaVu', '', font_path, uni=True)
     pdf.set_font('DejaVu', '', 12)
 
-    # Profile Image & Header
-    # (same as before, omitted for brevity)
-    # ...
+    # === Image ===
+    image_url = context.get("profile_image_url", "")
+    if image_url.startswith("data:image"):
+        try:
+            header, encoded = image_url.split(",", 1)
+            img_bytes = base64.b64decode(encoded)
+            img = Image.open(BytesIO(img_bytes))
+            with NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+                img.save(tmpfile.name)
+                pdf.image(tmpfile.name, x=pdf.w / 2 - 20, y=10, w=40, h=40)
+                os.unlink(tmpfile.name)
+        except:
+            pass
+    pdf.ln(45)
 
-    # Sections
+    # === Name and Email ===
+    pdf.set_font('DejaVu', '', 20)
+    pdf.cell(0, 10, clean_text(context.get("name", "John Doe")), ln=True, align="C")
+    pdf.set_font('DejaVu', '', 12)
+    pdf.cell(0, 8, f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
+    pdf.ln(6)
+
+    # === Column Separation Line ===
+    top_y = pdf.get_y()
+    bottom_y = 280
+    pdf.set_draw_color(180, 180, 180)
+    pdf.set_line_width(0.3)
+    pdf.line(pdf.l_margin + epw / 2, top_y, pdf.l_margin + epw / 2, bottom_y)
+
+    # === Data ===
     left_sections = [
         ("About Me", context.get("about_me", ""), False),
         ("Skills", context.get("skills", "").split("\n"), True),
@@ -1090,44 +957,40 @@ def render_pdf_from_data(context):
         ], True),
     ]
 
-    # Calculate total heights of columns
-    left_height = 0
-    for title, content, is_list in left_sections:
-        left_height += estimate_section_height(pdf, col_width, title, content, is_list)
-
-    right_height = 0
-    for title, content, is_list in right_sections:
-        right_height += estimate_section_height(pdf, col_width, title, content, is_list)
-
-    max_height = max(left_height, right_height)
-
-    current_y = pdf.get_y()
-    available_height = page_height - (current_y - pdf.t_margin)
-
-    # Page break if not fit
-    if max_height > available_height:
-        pdf.add_page()
-        current_y = pdf.get_y()
-
-    # Draw vertical line separator
-    pdf.set_draw_color(200, 200, 200)
-    pdf.set_line_width(0.4)
-    pdf.line(pdf.l_margin + epw / 2, current_y, pdf.l_margin + epw / 2, current_y + max_height)
-
-    # Draw left column
-    y_left = current_y
+    y_left = pdf.get_y()
+    y_right = y_left
     x_left = pdf.l_margin
-    for title, content, is_list in left_sections:
-        y_left = draw_section(pdf, x_left, y_left, col_width, title, content, is_list)
-
-    # Draw right column (start at same y as left)
-    y_right = current_y
     x_right = pdf.l_margin + epw / 2 + 5
+
+    def draw_section(x, y, title, content, is_list):
+        pdf.set_xy(x, y)
+        pdf.set_font('DejaVu', '', 14)
+        pdf.cell(col_width, 8, f"{title}:", ln=True)
+        pdf.set_font('DejaVu', '', 11)
+        start_y = pdf.get_y()
+        pdf.set_x(x)
+
+        if is_list and isinstance(content, list):
+            for item in content:
+                pdf.set_x(x)
+                pdf.multi_cell(col_width, 6, f"• {clean_text(item)}")
+        else:
+            pdf.multi_cell(col_width, 6, clean_text(content))
+
+        return pdf.get_y() + 2
+
+    # Left column
+    for title, content, is_list in left_sections:
+        y_left = draw_section(x_left, y_left, title, content, is_list)
+
+    # Right column
     for title, content, is_list in right_sections:
-        y_right = draw_section(pdf, x_right, y_right, col_width, title, content, is_list)
+        y_right = draw_section(x_right, y_right, title, content, is_list)
 
     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
     return BytesIO(pdf_output)
+
+
 
 
 
