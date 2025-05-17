@@ -899,6 +899,7 @@ import os
 #     return BytesIO(pdf_output)
 
 
+
 from fpdf import FPDF
 import os
 from io import BytesIO
@@ -915,7 +916,6 @@ def clean_text(text):
 def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
-
     epw = pdf.w - 2 * pdf.l_margin
 
     # Load font
@@ -933,51 +933,43 @@ def render_pdf_from_data(context):
     pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', ''))}", ln=True, align="C")
     pdf.ln(10)
 
-    def add_section(title, content_list):
-        if content_list:
+    def add_section(title, content):
+        if content:
             pdf.set_font('DejaVu', '', 14)
             pdf.cell(0, 10, f"{title}:", ln=True)
             pdf.set_font('DejaVu', '', 12)
-            for item in content_list:
-                clean_item = clean_text(item)
-                pdf.multi_cell(epw, 8, f"• {clean_item}")
+            text = clean_text(content)
+            pdf.multi_cell(epw, 8, text)
             pdf.ln(5)
 
     # About Me
-    about = clean_text(context.get("about_me", ""))
-    if about:
-        pdf.set_font('DejaVu', '', 14)
-        pdf.cell(0, 10, "About Me:", ln=True)
-        pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(epw, 8, about)
-        pdf.ln(5)
+    add_section("About Me", context.get("about_me", ""))
 
     # Skills
-    skills = context.get("skills", [])
-    add_section("Skills", skills)
+    add_section("Skills", context.get("skills", []))
 
-    # Education, Experience, Projects
+    # Education
     add_section("Education", context.get("education", []))
+
+    # Experience
     add_section("Experience", context.get("experience", []))
+
+    # Projects
     add_section("Projects", context.get("projects", []))
 
     # Interests
-    interests = context.get("interests", [])
-    add_section("Interests", interests)
+    add_section("Interests", context.get("interests", []))
 
     # Social Links
-    social_links = []
+    links = []
     for platform in ["linkedin", "github", "twitter"]:
         link = context.get(platform, "")
         if link:
-            social_links.append(f"{platform.capitalize()}: {clean_text(link)}")
-    add_section("Social Links", social_links)
+            links.append(f"{platform.capitalize()}: {link}")
+    add_section("Social Links", links)
 
-    # Output PDF as BytesIO
     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
     return BytesIO(pdf_output)
-
-
 
 
 
