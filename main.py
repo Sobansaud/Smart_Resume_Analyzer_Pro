@@ -878,7 +878,6 @@ load_dotenv()
 #     return BytesIO(pdf_output)
 
 
-
 from fpdf import FPDF
 from io import BytesIO
 import os
@@ -899,52 +898,49 @@ def clean_text(text):
 
 def render_pdf_from_data(context):
     pdf = FPDF()
+    pdf.set_auto_page_break(False)  # Manual control
     pdf.add_page()
+
     epw = pdf.w - 2 * pdf.l_margin
     col_width = epw / 2 - 5
 
-    # Font setup
+    # Font
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
     pdf.add_font('DejaVu', '', font_path, uni=True)
     pdf.set_font('DejaVu', '', 12)
 
-    # === Profile Image ===
+    # === Image ===
     image_url = context.get("profile_image_url", "")
     if image_url.startswith("data:image"):
         try:
             header, encoded = image_url.split(",", 1)
             img_bytes = base64.b64decode(encoded)
             img = Image.open(BytesIO(img_bytes))
-
             with NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
                 img.save(tmpfile.name)
                 pdf.image(tmpfile.name, x=pdf.w / 2 - 20, y=10, w=40, h=40)
                 os.unlink(tmpfile.name)
-            pdf.ln(45)
-        except Exception as e:
-            print("Error adding image:", e)
-            pdf.ln(10)
-    else:
-        pdf.ln(10)
+        except:
+            pass
+    pdf.ln(45)
 
-    # === Name and Email Centered ===
+    # === Name and Email ===
     pdf.set_font('DejaVu', '', 20)
     pdf.cell(0, 10, clean_text(context.get("name", "John Doe")), ln=True, align="C")
-
     pdf.set_font('DejaVu', '', 12)
     pdf.cell(0, 8, f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
-    pdf.ln(8)
+    pdf.ln(6)
 
-    # === Divider Line ===
+    # === Column Separation Line ===
     top_y = pdf.get_y()
     bottom_y = 280
-    pdf.set_draw_color(150, 150, 150)
+    pdf.set_draw_color(180, 180, 180)
     pdf.set_line_width(0.3)
     pdf.line(pdf.l_margin + epw / 2, top_y, pdf.l_margin + epw / 2, bottom_y)
 
-    # === Prepare Sections ===
+    # === Data ===
     left_sections = [
         ("About Me", context.get("about_me", ""), False),
         ("Skills", context.get("skills", "").split("\n"), True),
@@ -956,43 +952,41 @@ def render_pdf_from_data(context):
         ("Experience", context.get("experience", "").split("\n"), True),
         ("Interests", context.get("interests", "").split("\n"), True),
         ("Social Links", [
-            f"{platform.capitalize()}: {context.get(platform)}"
-            for platform in ["linkedin", "github", "twitter"]
-            if context.get(platform)
+            f"{p.capitalize()}: {context.get(p)}"
+            for p in ["linkedin", "github", "twitter"] if context.get(p)
         ], True),
     ]
 
-    # === Track Y separately for left and right ===
     y_left = pdf.get_y()
     y_right = y_left
+    x_left = pdf.l_margin
+    x_right = pdf.l_margin + epw / 2 + 5
 
-    def add_section(x, y, title, content, is_list):
+    def draw_section(x, y, title, content, is_list):
         pdf.set_xy(x, y)
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(col_width, 8, f"{title}:", ln=True)
         pdf.set_font('DejaVu', '', 11)
-        pdf.set_x(x)
         start_y = pdf.get_y()
+        pdf.set_x(x)
+
         if is_list and isinstance(content, list):
             for item in content:
-                pdf.multi_cell(col_width, 6, f"• {clean_text(item)}")
                 pdf.set_x(x)
+                pdf.multi_cell(col_width, 6, f"• {clean_text(item)}")
         else:
             pdf.multi_cell(col_width, 6, clean_text(content))
-        end_y = pdf.get_y()
-        return end_y + 2
 
-    # === Draw Left Column ===
-    x_left = pdf.l_margin
+        return pdf.get_y() + 2
+
+    # Left column
     for title, content, is_list in left_sections:
-        y_left = add_section(x_left, y_left, title, content, is_list)
+        y_left = draw_section(x_left, y_left, title, content, is_list)
 
-    # === Draw Right Column ===
-    x_right = pdf.l_margin + epw / 2 + 5
+    # Right column
     for title, content, is_list in right_sections:
-        y_right = add_section(x_right, y_right, title, content, is_list)
+        y_right = draw_section(x_right, y_right, title, content, is_list)
 
-    # Output as PDF in memory
     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
     return BytesIO(pdf_output)
 
