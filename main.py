@@ -501,6 +501,97 @@ load_dotenv()
 #     return BytesIO(pdf_output)
 
 
+# from fpdf import FPDF
+# import os
+# from io import BytesIO
+# import unicodedata
+
+# def clean_text(text):
+#     try:
+#         if isinstance(text, list):
+#             return "\n".join(map(lambda s: "- " + str(s).strip(), text))  # List into bullet style
+#         return unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode("ascii")
+#     except Exception:
+#         return str(text) or ""
+
+# def render_pdf_from_data(context):
+#     pdf = FPDF()
+#     pdf.add_page()
+#     epw = pdf.w - 2 * pdf.l_margin
+
+#     # Font setup
+#     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
+#     if not os.path.isfile(font_path):
+#         raise FileNotFoundError(f"Font file not found: {font_path}")
+#     pdf.add_font('DejaVu', '', font_path, uni=True)
+
+#     # Name & Email
+#     pdf.set_font('DejaVu', '', 20)
+#     pdf.cell(0, 15, txt=clean_text(context.get("name", "John Doe")), ln=True, align="C")
+
+#     pdf.set_font('DejaVu', '', 12)
+#     pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
+#     pdf.ln(8)
+
+#     def add_section(title, content, is_list=False):
+#         if content:
+#             pdf.set_font('DejaVu', '', 14)
+#             pdf.cell(0, 10, f"{title}:", ln=True)
+#             pdf.set_font('DejaVu', '', 12)
+#             if is_list and isinstance(content, list):
+#                 for item in content:
+#                     pdf.multi_cell(epw, 8, f"- {clean_text(item)}")
+#             else:
+#                 pdf.multi_cell(epw, 8, clean_text(content))
+#             pdf.ln(4)
+
+#     # About Me - paragraph style
+#     about_me = context.get("about_me", "A motivated and detail-oriented professional with a passion for solving real-world problems using technology.")
+#     add_section("About Me", about_me)
+
+#     # Skills - bulleted
+#     skills = context.get("skills", ["Python", "FastAPI", "Next.js", "Machine Learning", "Git"])
+#     add_section("Skills", skills, is_list=True)
+
+#     # Education - formatted list
+#     education = context.get("education", [
+#         "BSc in Computer Science - University of XYZ (2020 - 2024)",
+#         "Intermediate in Pre-Engineering - ABC College (2018 - 2020)"
+#     ])
+#     add_section("Education", education, is_list=True)
+
+#     # Experience - formatted list
+#     experience = context.get("experience", [
+#         "Software Intern at DevSolutions - Built REST APIs using FastAPI (Jun 2023 - Aug 2023)",
+#         "Frontend Developer - Freelance Projects using React and TailwindCSS (2022 - Present)"
+#     ])
+#     add_section("Experience", experience, is_list=True)
+
+#     # Projects - formatted list
+#     projects = context.get("projects", [
+#         "Smart Resume Analyzer - An AI-based web app to analyze and enhance resumes.",
+#         "E-commerce Dashboard - Built a full-stack dashboard with analytics using Next.js and Django."
+#     ])
+#     add_section("Projects", projects, is_list=True)
+
+#     # Interests
+#     interests = context.get("interests", ["Open Source", "Tech Blogging", "Hackathons"])
+#     add_section("Interests", interests, is_list=True)
+
+#     # Social Links
+#     links = []
+#     for platform in ["linkedin", "github", "twitter"]:
+#         link = context.get(platform)
+#         if link:
+#             links.append(f"{platform.capitalize()}: {link}")
+#     add_section("Social Links", links, is_list=True)
+
+#     # Final output
+#     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
+#     return BytesIO(pdf_output)
+
+
+
 from fpdf import FPDF
 import os
 from io import BytesIO
@@ -509,7 +600,7 @@ import unicodedata
 def clean_text(text):
     try:
         if isinstance(text, list):
-            return "\n".join(map(lambda s: "- " + str(s).strip(), text))  # List into bullet style
+            return "\n".join(map(lambda s: "- " + str(s).strip(), text))
         return unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode("ascii")
     except Exception:
         return str(text) or ""
@@ -517,79 +608,72 @@ def clean_text(text):
 def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
-    epw = pdf.w - 2 * pdf.l_margin
 
-    # Font setup
+    # Fonts
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
     pdf.add_font('DejaVu', '', font_path, uni=True)
 
-    # Name & Email
     pdf.set_font('DejaVu', '', 20)
+    pdf.set_text_color(30, 30, 30)
     pdf.cell(0, 15, txt=clean_text(context.get("name", "John Doe")), ln=True, align="C")
 
     pdf.set_font('DejaVu', '', 12)
+    pdf.set_text_color(100, 100, 100)
     pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
-    pdf.ln(8)
+    pdf.ln(10)
 
-    def add_section(title, content, is_list=False):
-        if content:
-            pdf.set_font('DejaVu', '', 14)
-            pdf.cell(0, 10, f"{title}:", ln=True)
-            pdf.set_font('DejaVu', '', 12)
-            if is_list and isinstance(content, list):
-                for item in content:
-                    pdf.multi_cell(epw, 8, f"- {clean_text(item)}")
-            else:
-                pdf.multi_cell(epw, 8, clean_text(content))
-            pdf.ln(4)
+    # Define column widths
+    page_width = pdf.w - 20
+    left_col_width = page_width * 0.4
+    right_col_width = page_width * 0.6
+    margin_left = 10
+    margin_top = pdf.get_y()
+    line_height = 6
 
-    # About Me - paragraph style
-    about_me = context.get("about_me", "A motivated and detail-oriented professional with a passion for solving real-world problems using technology.")
-    add_section("About Me", about_me)
+    def add_section(x, y, w, title, content, is_list=False):
+        pdf.set_xy(x, y)
+        pdf.set_font('DejaVu', '', 14)
+        pdf.set_text_color(0, 0, 80)
+        pdf.cell(w, 10, txt=title, ln=True)
 
-    # Skills - bulleted
-    skills = context.get("skills", ["Python", "FastAPI", "Next.js", "Machine Learning", "Git"])
-    add_section("Skills", skills, is_list=True)
+        pdf.set_font('DejaVu', '', 11)
+        pdf.set_text_color(0, 0, 0)
+        if is_list and isinstance(content, list):
+            for item in content:
+                pdf.set_x(x)
+                pdf.multi_cell(w, line_height, f"• {clean_text(item)}")
+        else:
+            pdf.set_x(x)
+            pdf.multi_cell(w, line_height, clean_text(content))
+        pdf.ln(2)
+        return pdf.get_y()
 
-    # Education - formatted list
-    education = context.get("education", [
-        "BSc in Computer Science - University of XYZ (2020 - 2024)",
-        "Intermediate in Pre-Engineering - ABC College (2018 - 2020)"
-    ])
-    add_section("Education", education, is_list=True)
+    # Starting y position
+    y_left = margin_top
+    y_right = margin_top
 
-    # Experience - formatted list
-    experience = context.get("experience", [
-        "Software Intern at DevSolutions - Built REST APIs using FastAPI (Jun 2023 - Aug 2023)",
-        "Frontend Developer - Freelance Projects using React and TailwindCSS (2022 - Present)"
-    ])
-    add_section("Experience", experience, is_list=True)
+    # LEFT COLUMN
+    y_left = add_section(margin_left, y_left, left_col_width, "About Me", context.get("about_me", "Enthusiastic developer..."))
+    y_left = add_section(margin_left, y_left, left_col_width, "Skills", context.get("skills", []), is_list=True)
+    y_left = add_section(margin_left, y_left, left_col_width, "Interests", context.get("interests", []), is_list=True)
 
-    # Projects - formatted list
-    projects = context.get("projects", [
-        "Smart Resume Analyzer - An AI-based web app to analyze and enhance resumes.",
-        "E-commerce Dashboard - Built a full-stack dashboard with analytics using Next.js and Django."
-    ])
-    add_section("Projects", projects, is_list=True)
-
-    # Interests
-    interests = context.get("interests", ["Open Source", "Tech Blogging", "Hackathons"])
-    add_section("Interests", interests, is_list=True)
-
-    # Social Links
     links = []
     for platform in ["linkedin", "github", "twitter"]:
         link = context.get(platform)
         if link:
             links.append(f"{platform.capitalize()}: {link}")
-    add_section("Social Links", links, is_list=True)
+    y_left = add_section(margin_left, y_left, left_col_width, "Social Links", links, is_list=True)
 
-    # Final output
-    pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
-    return BytesIO(pdf_output)
+    # RIGHT COLUMN
+    x_right = margin_left + left_col_width + 10
+    y_right = add_section(x_right, margin_top, right_col_width, "Education", context.get("education", []), is_list=True)
+    y_right = add_section(x_right, y_right, right_col_width, "Experience", context.get("experience", []), is_list=True)
+    y_right = add_section(x_right, y_right, right_col_width, "Projects", context.get("projects", []), is_list=True)
 
+    # Output
+    return BytesIO(pdf.output(dest='S').encode('latin1', 'ignore'))
 
 
 
