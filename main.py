@@ -825,23 +825,25 @@ def render_pdf_from_data(context):
 
     # Function to add section in two-column layout
     def add_section(title, content, is_list=False, left=True):
-        col_width = epw / 2 - 5
-        x = pdf.l_margin if left else pdf.l_margin + epw / 2 + 5
-        y = pdf.get_y()
+    col_width = epw / 2 - 5
+    x = pdf.l_margin if left else pdf.l_margin + epw / 2 + 5
+    y = pdf.get_y()
 
-        pdf.set_xy(x, y)
-        pdf.set_font('DejaVu', '', 14)
-        pdf.cell(col_width, 10, f"{title}:", ln=True)
-        pdf.set_font('DejaVu', '', 11)
-        pdf.set_x(x)
+    pdf.set_xy(x, y)
+    pdf.set_font('DejaVu', '', 14)
+    pdf.cell(col_width, 10, f"{title}:", ln=True)
+    pdf.set_font('DejaVu', '', 11)
+    pdf.set_x(x)
 
-        if is_list and isinstance(content, list):
-            for item in content:
-                pdf.multi_cell(col_width, 6, f"• {clean_text(item)}", ln=1)
-                pdf.set_x(x)
-        else:
-            pdf.multi_cell(col_width, 6, clean_text(content), ln=1)
-        pdf.ln(3)
+    if is_list and isinstance(content, list):
+        for item in content:
+            pdf.multi_cell(col_width, 6, f"• {clean_text(item)}")
+            pdf.set_x(x)
+    else:
+        pdf.multi_cell(col_width, 6, clean_text(content))  # 🔥 FIXED LINE — removed ln=1
+
+    pdf.ln(3)
+
 
     # Two-column layout
     left_data = [
