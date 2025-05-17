@@ -428,415 +428,33 @@ from components.suggestions import SuggestionGenerator
 load_dotenv()
 
 
-# def render_pdf_from_template(template_path, context, output_filename):
-#     # Render HTML with Jinja2
-#     template_loader = jinja2.FileSystemLoader(searchpath="./templates")
-#     env = jinja2.Environment(loader=template_loader)
-#     template = env.get_template(template_path)
-#     html_content = template.render(context)
-
-#     # Save temporary HTML file
-#     temp_html_file = "temp_cv.html"
-#     with open(temp_html_file, "w", encoding="utf-8") as f:
-#         f.write(html_content)
-
-#     # Path to wkhtmltopdf
-#     path_to_wkhtmltopdf = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"  # ← Update this path if different
-#     config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe")
-
-#     # PDF options
-#     options = {
-#         'enable-local-file-access': " ",
-#         'quiet': '',
-#         'encoding': "UTF-8",
-#         'page-size': 'A4',
-#         'margin-top': '0mm',
-#         'margin-right': '0mm',
-#         'margin-bottom': '0mm',
-#         'margin-left': '0mm',
-#         'zoom': '0.9',  # Compresses slightly
-
-#     }
-
-#     # Generate PDF
-#     pdfkit.from_file(temp_html_file, output_filename, options=options, configuration=config)
-#     return output_filename
-
-
-# def render_pdf_from_template(template_path, context, output_filename):
-#     # Render HTML with Jinja2
-#     template_loader = jinja2.FileSystemLoader(searchpath="./templates")
-#     env = jinja2.Environment(loader=template_loader)
-#     template = env.get_template(template_path)
-#     html_content = template.render(context)
-
-#     # Save temporary HTML file
-#     temp_html_file = "temp_cv.html"
-#     with open(temp_html_file, "w", encoding="utf-8") as f:
-#         f.write(html_content)
-
-#     # Detect OS and configure wkhtmltopdf path accordingly
-#     if platform.system() == "Windows":
-#         # Windows path (update if your wkhtmltopdf installed location is different)
-#         wkhtmltopdf_path = r"C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe"
-#         config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
-#     else:
-#         # For Linux / Mac assume wkhtmltopdf is in PATH
-#         config = pdfkit.configuration()
-
-#     # PDF options
-#     options = {
-#         'enable-local-file-access': None,  # use None or "" both okay
-#         'quiet': '',
-#         'encoding': "UTF-8",
-#         'page-size': 'A4',
-#         'margin-top': '0mm',
-#         'margin-right': '0mm',
-#         'margin-bottom': '0mm',
-#         'margin-left': '0mm',
-#         'zoom': '0.9',
-#     }
-
-#     # Generate PDF
-#     pdfkit.from_file(temp_html_file, output_filename, options=options, configuration=config)
-
-#     return output_filename
-
-# def render_pdf_from_template(template_path, context, output_filename):
-#     # Step 1: Load Jinja2 Template
-#     template_loader = jinja2.FileSystemLoader(searchpath="./templates")
-#     env = jinja2.Environment(loader=template_loader)
-#     template = env.get_template(template_path)
-#     html_content = template.render(context)
-
-#     # Step 2: Render PDF using WeasyPrint
-#     HTML(string=html_content, base_url=".").write_pdf(output_filename)
-
-#     return output_filename
-
-
-# def render_pdf_from_template(template_path, context, output_filename):
-#     # Render HTML with Jinja2
-#     template_loader = jinja2.FileSystemLoader(searchpath="./templates")
-#     env = jinja2.Environment(loader=template_loader)
-#     template = env.get_template(template_path)
-#     html_content = template.render(context)
-
-#     # Generate PDF using WeasyPrint
-#     HTML(string=html_content).write_pdf(output_filename)
-
-#     return output_filename
-
-
-# def render_pdf_from_template(template_name, context, output_filename):
-#     # Load HTML from Jinja2 template
-#     env = Environment(loader=FileSystemLoader("templates"))
-#     template = env.get_template(template_name)
-#     html_content = template.render(context)
-
-#     # Convert HTML to PDF using xhtml2pdf
-#     result_file = open(output_filename, "w+b")
-#     pisa_status = pisa.CreatePDF(io.StringIO(html_content), dest=result_file)
-#     result_file.close()
-    
-#     if pisa_status.err:
-#         raise Exception("Failed to generate PDF")
-    
-#     return output_filename
-
-# def render_pdf_from_data(context):
-#     pdf = FPDF()
-#     pdf.add_page()
-
-#     # Font file path
-#     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
-#     if not os.path.isfile(font_path):
-#         raise FileNotFoundError(f"Font file not found: {font_path}")
-
-#     # Add font once
-#     # pdf.add_font('DejaVu', '', font_path, uni=True)
-#     # pdf.set_font('DejaVu', '', 20)
-#     pdf.set_font("Arial", size=12)  # Arial is built-in, no TTF needed
-
-
-#     pdf.cell(0, 15, txt=context.get("name", "Name"), ln=True, align="C")
-
-#     pdf.set_font('DejaVu', '', 12)
-#     pdf.cell(0, 10, txt=f"Email: {context.get('email', '')}", ln=True, align="C")
-#     pdf.ln(5)
-
-#     pdf.set_font('DejaVu', '', 14)
-#     pdf.cell(0, 10, "About Me:", ln=True)
-#     pdf.set_font('DejaVu', '', 12)
-#     pdf.multi_cell(0, 8, context.get("about_me", ""))
-#     pdf.ln(5)
-
-#     # Skills
-#     skills = ", ".join(context.get("skills", []))
-#     if skills:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Skills:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         pdf.multi_cell(0, 8, skills)
-#         pdf.ln(5)
-
-#     # Education
-#     education = context.get("education", [])
-#     if education:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Education:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         for edu in education:
-#             pdf.cell(0, 8, f"- {edu}", ln=True)
-#         pdf.ln(5)
-
-#     # Experience
-#     experience = context.get("experience", [])
-#     if experience:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Experience:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         for exp in experience:
-#             pdf.cell(0, 8, f"- {exp}", ln=True)
-#         pdf.ln(5)
-
-#     # Projects
-#     projects = context.get("projects", [])
-#     if projects:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Projects:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         for proj in projects:
-#             pdf.cell(0, 8, f"- {proj}", ln=True)
-#         pdf.ln(5)
-
-#     # Interests
-#     interests = ", ".join(context.get("interests", []))
-#     if interests:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Interests:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         pdf.multi_cell(0, 8, interests)
-#         pdf.ln(5)
-
-#     # Social Links
-#     pdf.set_font('DejaVu', '', 14)
-#     pdf.cell(0, 10, "Social Links:", ln=True)
-#     pdf.set_font('DejaVu', '', 12)
-#     linkedin = context.get("linkedin", "")
-#     github = context.get("github", "")
-#     twitter = context.get("twitter", "")
-#     if linkedin:
-#         pdf.cell(0, 8, f"LinkedIn: {linkedin}", ln=True)
-#     if github:
-#         pdf.cell(0, 8, f"GitHub: {github}", ln=True)
-#     if twitter:
-#         pdf.cell(0, 8, f"Twitter: {twitter}", ln=True)
-
-#     # Output PDF to BytesIO buffer
-#     pdf_bytes = pdf.output(dest='S').encode('latin1')
-#     pdf_output = BytesIO(pdf_bytes)
-#     return pdf_output
-
-# def safe_multi_cell(pdf, text, line_height=8, max_chunk=500):
-#     for i in range(0, len(text), max_chunk):
-#         pdf.multi_cell(0, line_height, text[i:i+max_chunk])
-
-# def render_pdf_from_data(context):
-#     pdf = FPDF()
-#     pdf.add_page()
-
-#     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
-#     if not os.path.isfile(font_path):
-#         raise FileNotFoundError(f"Font file not found: {font_path}")
-
-#     pdf.add_font('DejaVu', '', font_path, uni=True)
-#     pdf.set_font('DejaVu', '', 20)
-#     pdf.cell(0, 15, txt=context.get("name", "Name"), ln=True, align="C")
-
-#     pdf.set_font('DejaVu', '', 12)
-#     pdf.cell(0, 10, txt=f"Email: {context.get('email', '')}", ln=True, align="C")
-#     pdf.ln(5)
-
-#     pdf.set_font('DejaVu', '', 14)
-#     pdf.cell(0, 10, "About Me:", ln=True)
-#     pdf.set_font('DejaVu', '', 12)
-#     safe_multi_cell(pdf, context.get("about_me", ""))
-#     pdf.ln(5)
-
-#     # Repeat safe_multi_cell for other multi_cell calls similarly
-#     # For example, Skills:
-#     skills = ", ".join(context.get("skills", []))
-#     if skills:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Skills:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         safe_multi_cell(pdf, skills)
-#         pdf.ln(5)
-
-#     # Education
-#     education = context.get("education", [])
-#     if education:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Education:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         for edu in education:
-#             pdf.cell(0, 8, f"- {edu}", ln=True)
-#         pdf.ln(5)
-
-#     # Experience
-#     experience = context.get("experience", [])
-#     if experience:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Experience:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         for exp in experience:
-#             pdf.cell(0, 8, f"- {exp}", ln=True)
-#         pdf.ln(5)
-
-#     # Projects
-#     projects = context.get("projects", [])
-#     if projects:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Projects:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         for proj in projects:
-#             pdf.cell(0, 8, f"- {proj}", ln=True)
-#         pdf.ln(5)
-
-#     # Interests
-#     interests = ", ".join(context.get("interests", []))
-#     if interests:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Interests:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         safe_multi_cell(pdf, interests)
-#         pdf.ln(5)
-
-#     # Social Links
-#     pdf.set_font('DejaVu', '', 14)
-#     pdf.cell(0, 10, "Social Links:", ln=True)
-#     pdf.set_font('DejaVu', '', 12)
-#     linkedin = context.get("linkedin", "")
-#     github = context.get("github", "")
-#     twitter = context.get("twitter", "")
-#     if linkedin:
-#         pdf.cell(0, 8, f"LinkedIn: {linkedin}", ln=True)
-#     if github:
-#         pdf.cell(0, 8, f"GitHub: {github}", ln=True)
-#     if twitter:
-#         pdf.cell(0, 8, f"Twitter: {twitter}", ln=True)
-
-
-#     # pdf_bytes = pdf.output(dest='S').encode('utf-8')  # or just skip encode altogether
-#     pdf_bytes = BytesIO()
-#     pdf.output(pdf_bytes)  # Directly write to BytesIO
-#     pdf_bytes.seek(0)
-#     return pdf_bytes
-
-
 
 # from fpdf import FPDF
+# import os
 # from io import BytesIO
 # import unicodedata
-# import os
 
 # def clean_text(text):
 #     try:
-#         return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
-#     except:
-#         return text or ""
+#         if isinstance(text, list):
+#             text = ", ".join(map(str, text))
+#         return unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode("ascii")
+#     except Exception:
+#         return str(text) or ""
 
 # def render_pdf_from_data(context):
 #     pdf = FPDF()
 #     pdf.add_page()
-
-#     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
-#     if not os.path.isfile(font_path):
-#         raise FileNotFoundError(f"Font file not found: {font_path}")
-
-#     pdf.add_font('DejaVu', '', font_path, uni=True)
-#     pdf.set_font('DejaVu', '', 20)
-#     pdf.cell(0, 15, txt=clean_text(context.get("name", "Name")), ln=True, align="C")
-
-#     pdf.set_font('DejaVu', '', 12)
-#     pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', ''))}", ln=True, align="C")
-#     pdf.ln(5)
-
-#     pdf.set_font('DejaVu', '', 14)
-#     pdf.cell(0, 10, "About Me:", ln=True)
-#     pdf.set_font('DejaVu', '', 12)
-#     pdf.multi_cell(0, 8, clean_text(context.get("about_me", "")))
-#     pdf.ln(5)
-
-#     skills = ", ".join(context.get("skills", []))
-#     if skills:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Skills:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         pdf.multi_cell(0, 8, clean_text(skills))
-#         pdf.ln(5)
-
-#     for section_title, items in [
-#         ("Education", context.get("education", [])),
-#         ("Experience", context.get("experience", [])),
-#         ("Projects", context.get("projects", [])),
-#     ]:
-#         if items:
-#             pdf.set_font('DejaVu', '', 14)
-#             pdf.cell(0, 10, f"{section_title}:", ln=True)
-#             pdf.set_font('DejaVu', '', 12)
-#             for item in items:
-#                 pdf.multi_cell(0, 8, f"- {clean_text(item)}")
-#             pdf.ln(5)
-
-#     interests = ", ".join(context.get("interests", []))
-#     if interests:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Interests:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         pdf.multi_cell(0, 8, clean_text(interests))
-#         pdf.ln(5)
-
-#     pdf.set_font('DejaVu', '', 14)
-#     pdf.cell(0, 10, "Social Links:", ln=True)
-#     pdf.set_font('DejaVu', '', 12)
-#     for platform in ["linkedin", "github", "twitter"]:
-#         link = context.get(platform, "")
-#         if link:
-#             pdf.multi_cell(0, 8, f"{platform.capitalize()}: {clean_text(link)}")
-
-#     # ✅ THIS PART FIXES THE ERROR:
-#     pdf_output = pdf.output(dest='S').encode('latin1')  # Or .encode('utf-8') if you know your chars are safe
-#     return BytesIO(pdf_output)
-
-from fpdf import FPDF
-from io import BytesIO
-import unicodedata
-import os
-
-
-# def clean_text(text):
-#     try:
-#         return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
-#     except:
-#         return text or ""
-
-# def render_pdf_from_data(context):
-#     pdf = FPDF()
-#     pdf.add_page()
-
-#     # Manually calculate Effective Page Width (for fpdf v1.x)
 #     epw = pdf.w - 2 * pdf.l_margin
 
+#     # Load font
 #     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
 #     if not os.path.isfile(font_path):
 #         raise FileNotFoundError(f"Font file not found: {font_path}")
-
 #     pdf.add_font('DejaVu', '', font_path, uni=True)
+#     pdf.set_font('DejaVu', '', 20)
 
 #     # Name
-#     pdf.set_font('DejaVu', '', 20)
 #     pdf.cell(0, 15, txt=clean_text(context.get("name", "Name")), ln=True, align="C")
 
 #     # Email
@@ -844,60 +462,43 @@ import os
 #     pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', ''))}", ln=True, align="C")
 #     pdf.ln(10)
 
-#     # About Me
-#     about = clean_text(context.get("about_me", ""))
-#     if about:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "About Me:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         pdf.multi_cell(epw, 8, about)
-#         pdf.ln(5)
-
-#     # Skills
-#     skills = clean_text(context.get("skills", ""))
-#     if skills:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Skills:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         pdf.multi_cell(epw, 8, skills)
-
-    
-#     # Education / Experience / Projects                                                         
-#     for section_title, items in [
-#         ("Education", context.get("education", [])),
-#         ("Experience", context.get("experience", [])),
-#         ("Projects", context.get("projects", [])),
-#     ]:
-#         if items:
+#     def add_section(title, content):
+#         if content:
 #             pdf.set_font('DejaVu', '', 14)
-#             pdf.cell(0, 10, f"{section_title}:", ln=True)
+#             pdf.cell(0, 10, f"{title}:", ln=True)
 #             pdf.set_font('DejaVu', '', 12)
-#             for item in items:
-#                 pdf.multi_cell(epw, 8, f"• {clean_text(item)}")
+#             text = clean_text(content)
+#             pdf.multi_cell(epw, 8, text)
 #             pdf.ln(5)
 
+#     # About Me
+#     add_section("About Me", context.get("about_me", ""))
+
+#     # Skills
+#     add_section("Skills", context.get("skills", []))
+
+#     # Education
+#     add_section("Education", context.get("education", []))
+
+#     # Experience
+#     add_section("Experience", context.get("experience", []))
+
+#     # Projects
+#     add_section("Projects", context.get("projects", []))
+
 #     # Interests
-#     interests = ", ".join(context.get("interests", []))
-#     if interests:
-#         pdf.set_font('DejaVu', '', 14)
-#         pdf.cell(0, 10, "Interests:", ln=True)
-#         pdf.set_font('DejaVu', '', 12)
-#         pdf.multi_cell(epw, 8, clean_text(interests))
-#         pdf.ln(5)
+#     add_section("Interests", context.get("interests", []))
 
 #     # Social Links
-#     pdf.set_font('DejaVu', '', 14)
-#     pdf.cell(0, 10, "Social Links:", ln=True)
-#     pdf.set_font('DejaVu', '', 12)
+#     links = []
 #     for platform in ["linkedin", "github", "twitter"]:
 #         link = context.get(platform, "")
 #         if link:
-#             pdf.multi_cell(epw, 8, f"{platform.capitalize()}: {clean_text(link)}")
+#             links.append(f"{platform.capitalize()}: {link}")
+#     add_section("Social Links", links)
 
-#     # Generate PDF in memory
-#     pdf_output = pdf.output(dest='S').encode('latin1')
+#     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
 #     return BytesIO(pdf_output)
-
 
 
 from fpdf import FPDF
@@ -908,7 +509,7 @@ import unicodedata
 def clean_text(text):
     try:
         if isinstance(text, list):
-            text = ", ".join(map(str, text))
+            return "\n".join(map(lambda s: "- " + str(s).strip(), text))  # List into bullet style
         return unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode("ascii")
     except Exception:
         return str(text) or ""
@@ -918,58 +519,77 @@ def render_pdf_from_data(context):
     pdf.add_page()
     epw = pdf.w - 2 * pdf.l_margin
 
-    # Load font
+    # Font setup
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
     pdf.add_font('DejaVu', '', font_path, uni=True)
+
+    # Name & Email
     pdf.set_font('DejaVu', '', 20)
+    pdf.cell(0, 15, txt=clean_text(context.get("name", "John Doe")), ln=True, align="C")
 
-    # Name
-    pdf.cell(0, 15, txt=clean_text(context.get("name", "Name")), ln=True, align="C")
-
-    # Email
     pdf.set_font('DejaVu', '', 12)
-    pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', ''))}", ln=True, align="C")
-    pdf.ln(10)
+    pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
+    pdf.ln(8)
 
-    def add_section(title, content):
+    def add_section(title, content, is_list=False):
         if content:
             pdf.set_font('DejaVu', '', 14)
             pdf.cell(0, 10, f"{title}:", ln=True)
             pdf.set_font('DejaVu', '', 12)
-            text = clean_text(content)
-            pdf.multi_cell(epw, 8, text)
-            pdf.ln(5)
+            if is_list and isinstance(content, list):
+                for item in content:
+                    pdf.multi_cell(epw, 8, f"- {clean_text(item)}")
+            else:
+                pdf.multi_cell(epw, 8, clean_text(content))
+            pdf.ln(4)
 
-    # About Me
-    add_section("About Me", context.get("about_me", ""))
+    # About Me - paragraph style
+    about_me = context.get("about_me", "A motivated and detail-oriented professional with a passion for solving real-world problems using technology.")
+    add_section("About Me", about_me)
 
-    # Skills
-    add_section("Skills", context.get("skills", []))
+    # Skills - bulleted
+    skills = context.get("skills", ["Python", "FastAPI", "Next.js", "Machine Learning", "Git"])
+    add_section("Skills", skills, is_list=True)
 
-    # Education
-    add_section("Education", context.get("education", []))
+    # Education - formatted list
+    education = context.get("education", [
+        "BSc in Computer Science - University of XYZ (2020 - 2024)",
+        "Intermediate in Pre-Engineering - ABC College (2018 - 2020)"
+    ])
+    add_section("Education", education, is_list=True)
 
-    # Experience
-    add_section("Experience", context.get("experience", []))
+    # Experience - formatted list
+    experience = context.get("experience", [
+        "Software Intern at DevSolutions - Built REST APIs using FastAPI (Jun 2023 - Aug 2023)",
+        "Frontend Developer - Freelance Projects using React and TailwindCSS (2022 - Present)"
+    ])
+    add_section("Experience", experience, is_list=True)
 
-    # Projects
-    add_section("Projects", context.get("projects", []))
+    # Projects - formatted list
+    projects = context.get("projects", [
+        "Smart Resume Analyzer - An AI-based web app to analyze and enhance resumes.",
+        "E-commerce Dashboard - Built a full-stack dashboard with analytics using Next.js and Django."
+    ])
+    add_section("Projects", projects, is_list=True)
 
     # Interests
-    add_section("Interests", context.get("interests", []))
+    interests = context.get("interests", ["Open Source", "Tech Blogging", "Hackathons"])
+    add_section("Interests", interests, is_list=True)
 
     # Social Links
     links = []
     for platform in ["linkedin", "github", "twitter"]:
-        link = context.get(platform, "")
+        link = context.get(platform)
         if link:
             links.append(f"{platform.capitalize()}: {link}")
-    add_section("Social Links", links)
+    add_section("Social Links", links, is_list=True)
 
+    # Final output
     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
     return BytesIO(pdf_output)
+
 
 
 
