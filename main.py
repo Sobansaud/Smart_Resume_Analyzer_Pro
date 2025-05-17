@@ -677,6 +677,100 @@ load_dotenv()
 
 
 
+# from fpdf import FPDF
+# import os
+# from io import BytesIO
+# import unicodedata
+
+# def clean_text(text):
+#     try:
+#         if isinstance(text, list):
+#             return "\n".join(map(lambda s: "- " + str(s).strip(), text))
+#         return unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode("ascii")
+#     except Exception:
+#         return str(text) or ""
+
+# def render_pdf_from_data(context):
+#     pdf = FPDF()
+#     pdf.add_page()
+
+#     # Fonts
+#     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
+#     if not os.path.isfile(font_path):
+#         raise FileNotFoundError(f"Font file not found: {font_path}")
+#     pdf.add_font('DejaVu', '', font_path, uni=True)
+
+#     pdf.set_font('DejaVu', '', 20)
+#     pdf.set_text_color(30, 30, 30)
+#     pdf.cell(0, 15, txt=clean_text(context.get("name", "John Doe")), ln=True, align="C")
+
+#     pdf.set_font('DejaVu', '', 12)
+#     pdf.set_text_color(100, 100, 100)
+#     pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
+#     pdf.ln(5)
+
+#     # Optional profile image
+#     image_path = os.path.join("static", "profile.jpg")
+#     if os.path.isfile(image_path):
+#         pdf.image(image_path, x=10, y=pdf.get_y(), w=30)
+#         pdf.ln(35)
+#     else:
+#         pdf.ln(10)
+
+#     # Layout dimensions
+#     page_width = pdf.w - 20
+#     left_col_width = page_width * 0.4
+#     right_col_width = page_width * 0.6
+#     margin_left = 10
+#     x_right = margin_left + left_col_width + 10
+#     y_start = pdf.get_y()
+#     line_height = 6
+
+#     # Draw center line
+#     center_x = margin_left + left_col_width + 5
+#     pdf.set_draw_color(200, 200, 200)
+#     pdf.line(center_x, y_start - 5, center_x, 280)
+
+#     def add_section(x, y, w, title, content, is_list=False):
+#         pdf.set_xy(x, y)
+#         pdf.set_font('DejaVu', '', 13)
+#         pdf.set_text_color(0, 0, 100)
+#         pdf.cell(w, 8, txt=title, ln=True)
+
+#         pdf.set_font('DejaVu', '', 11)
+#         pdf.set_text_color(30, 30, 30)
+#         if is_list and isinstance(content, list):
+#             for item in content:
+#                 pdf.set_x(x)
+#                 pdf.multi_cell(w, line_height, f"• {clean_text(item)}")
+#         else:
+#             pdf.set_x(x)
+#             pdf.multi_cell(w, line_height, clean_text(content))
+#         pdf.ln(2)
+#         return pdf.get_y()
+
+#     # LEFT COLUMN
+#     y_left = y_start
+#     y_left = add_section(margin_left, y_left, left_col_width, "About Me", context.get("about_me", "A passionate developer..."))
+#     y_left = add_section(margin_left, y_left, left_col_width, "Skills", context.get("skills", []), is_list=True)
+#     y_left = add_section(margin_left, y_left, left_col_width, "Interests", context.get("interests", []), is_list=True)
+
+#     links = []
+#     for platform in ["linkedin", "github", "twitter"]:
+#         link = context.get(platform)
+#         if link:
+#             links.append(f"{platform.capitalize()}: {link}")
+#     y_left = add_section(margin_left, y_left, left_col_width, "Social Links", links, is_list=True)
+
+#     # RIGHT COLUMN
+#     y_right = y_start
+#     y_right = add_section(x_right, y_right, right_col_width, "Education", context.get("education", []), is_list=True)
+#     y_right = add_section(x_right, y_right, right_col_width, "Experience", context.get("experience", []), is_list=True)
+#     y_right = add_section(x_right, y_right, right_col_width, "Projects", context.get("projects", []), is_list=True)
+
+#     # Output as BytesIO
+#     return BytesIO(pdf.output(dest='S').encode('latin1', 'ignore'))
+
 from fpdf import FPDF
 import os
 from io import BytesIO
@@ -694,47 +788,46 @@ def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
 
-    # Fonts
+    # Load font
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
     pdf.add_font('DejaVu', '', font_path, uni=True)
 
-    pdf.set_font('DejaVu', '', 20)
-    pdf.set_text_color(30, 30, 30)
-    pdf.cell(0, 15, txt=clean_text(context.get("name", "John Doe")), ln=True, align="C")
+    pdf.set_font('DejaVu', '', 22)
+    pdf.set_text_color(20, 20, 60)
+    pdf.cell(0, 12, txt=clean_text(context.get("name", "John Doe")), ln=True, align="C")
 
     pdf.set_font('DejaVu', '', 12)
     pdf.set_text_color(100, 100, 100)
-    pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
-    pdf.ln(5)
+    pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', 'example@email.com'))}", ln=True, align="C")
 
-    # Optional profile image
-    image_path = os.path.join("static", "profile.jpg")
-    if os.path.isfile(image_path):
-        pdf.image(image_path, x=10, y=pdf.get_y(), w=30)
-        pdf.ln(35)
+    # Profile image section (user provided)
+    image_path = context.get("profile_pic")  # user-provided path
+    if image_path and os.path.isfile(image_path):
+        pdf.image(image_path, x=85, y=pdf.get_y() + 5, w=40)
+        pdf.ln(45)
     else:
         pdf.ln(10)
 
-    # Layout dimensions
+    # Layout setup
     page_width = pdf.w - 20
-    left_col_width = page_width * 0.4
-    right_col_width = page_width * 0.6
-    margin_left = 10
-    x_right = margin_left + left_col_width + 10
+    col1_width = page_width * 0.42
+    col2_width = page_width * 0.53
+    margin_x = 10
+    x_col2 = margin_x + col1_width + 8
     y_start = pdf.get_y()
     line_height = 6
 
-    # Draw center line
-    center_x = margin_left + left_col_width + 5
-    pdf.set_draw_color(200, 200, 200)
-    pdf.line(center_x, y_start - 5, center_x, 280)
+    # Center divider
+    center_line = margin_x + col1_width + 4
+    pdf.set_draw_color(220, 220, 220)
+    pdf.line(center_line, y_start, center_line, 280)
 
-    def add_section(x, y, w, title, content, is_list=False):
+    def section(x, y, w, title, content, is_list=False):
         pdf.set_xy(x, y)
         pdf.set_font('DejaVu', '', 13)
-        pdf.set_text_color(0, 0, 100)
+        pdf.set_text_color(0, 0, 80)
         pdf.cell(w, 8, txt=title, ln=True)
 
         pdf.set_font('DejaVu', '', 11)
@@ -746,29 +839,30 @@ def render_pdf_from_data(context):
         else:
             pdf.set_x(x)
             pdf.multi_cell(w, line_height, clean_text(content))
-        pdf.ln(2)
+        pdf.ln(1)
         return pdf.get_y()
 
-    # LEFT COLUMN
+    # LEFT COLUMN SECTIONS
     y_left = y_start
-    y_left = add_section(margin_left, y_left, left_col_width, "About Me", context.get("about_me", "A passionate developer..."))
-    y_left = add_section(margin_left, y_left, left_col_width, "Skills", context.get("skills", []), is_list=True)
-    y_left = add_section(margin_left, y_left, left_col_width, "Interests", context.get("interests", []), is_list=True)
+    y_left = section(margin_x, y_left, col1_width, "About Me", context.get("about_me", ""), is_list=False)
+    y_left = section(margin_x, y_left, col1_width, "Skills", context.get("skills", []), is_list=True)
+    y_left = section(margin_x, y_left, col1_width, "Interests", context.get("interests", []), is_list=True)
 
+    # Social Links
     links = []
-    for platform in ["linkedin", "github", "twitter"]:
-        link = context.get(platform)
+    for p in ["linkedin", "github", "twitter", "portfolio"]:
+        link = context.get(p)
         if link:
-            links.append(f"{platform.capitalize()}: {link}")
-    y_left = add_section(margin_left, y_left, left_col_width, "Social Links", links, is_list=True)
+            links.append(f"{p.capitalize()}: {link}")
+    y_left = section(margin_x, y_left, col1_width, "Social Links", links, is_list=True)
 
-    # RIGHT COLUMN
+    # RIGHT COLUMN SECTIONS
     y_right = y_start
-    y_right = add_section(x_right, y_right, right_col_width, "Education", context.get("education", []), is_list=True)
-    y_right = add_section(x_right, y_right, right_col_width, "Experience", context.get("experience", []), is_list=True)
-    y_right = add_section(x_right, y_right, right_col_width, "Projects", context.get("projects", []), is_list=True)
+    y_right = section(x_col2, y_right, col2_width, "Education", context.get("education", []), is_list=True)
+    y_right = section(x_col2, y_right, col2_width, "Experience", context.get("experience", []), is_list=True)
+    y_right = section(x_col2, y_right, col2_width, "Projects", context.get("projects", []), is_list=True)
 
-    # Output as BytesIO
+    # Final output
     return BytesIO(pdf.output(dest='S').encode('latin1', 'ignore'))
 
 
