@@ -548,91 +548,175 @@ def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
 
-    # Load Unicode font (font file should be in the same folder or specify full path)
-    pdf.add_font('DejaVu', '', 'DejaVuSans.ttf', uni=True)
-    pdf.set_font("DejaVu", "", 20)
-    pdf.cell(0, 12, txt=context.get("name", "Name"), ln=True, align="C")
+    font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'DejaVuSans.ttf')
 
-    pdf.set_font("DejaVu", "", 12)
-    pdf.cell(0, 10, f"Email: {context.get('email', '')}", ln=True, align="C")
+    # Add the font once with empty style:
+    pdf.add_font('DejaVu', '', font_path, uni=True)
+    pdf.set_font('DejaVu', '', 20)
+    pdf.cell(0, 15, txt=context.get("name", "Name"), ln=True, align="C")
+
+    pdf.set_font('DejaVu', '', 12)
+    pdf.cell(0, 10, txt=f"Email: {context.get('email', '')}", ln=True, align="C")
     pdf.ln(5)
 
-    # About Me
-    pdf.set_font("DejaVu", "", 14)
+    pdf.set_font('DejaVu', '', 14)
     pdf.cell(0, 10, "About Me:", ln=True)
-    pdf.set_font("DejaVu", "", 12)
-    pdf.multi_cell(0, 6, context.get("about_me", ""))
+    pdf.set_font('DejaVu', '', 12)
+    pdf.multi_cell(0, 8, context.get("about_me", ""))
     pdf.ln(5)
 
-    # Skills (simple plain text, multiline or comma separated)
-    skills = context.get("skills", "")
-    if isinstance(skills, list):
-        skills = ", ".join(skills)
-    pdf.set_font("DejaVu", "", 14)
-    pdf.cell(0, 10, "Skills:", ln=True)
-    pdf.set_font("DejaVu", "", 12)
-    pdf.multi_cell(0, 6, skills)
-    pdf.ln(5)
+    # Continue with other fields similarly, using the same font and style:
+    skills = ", ".join(context.get("skills", []))
+    if skills:
+        pdf.set_font('DejaVu', '', 14)
+        pdf.cell(0, 10, "Skills:", ln=True)
+        pdf.set_font('DejaVu', '', 12)
+        pdf.multi_cell(0, 8, skills)
+        pdf.ln(5)
 
-    # Education (multiline text)
-    education = context.get("education", "")
-    if isinstance(education, list):
-        education = "\n".join(education)
-    pdf.set_font("DejaVu", "", 14)
-    pdf.cell(0, 10, "Education:", ln=True)
-    pdf.set_font("DejaVu", "", 12)
-    pdf.multi_cell(0, 6, education)
-    pdf.ln(5)
+    # Education
+    education = context.get("education", [])
+    if education:
+        pdf.set_font('DejaVu', '', 14)
+        pdf.cell(0, 10, "Education:", ln=True)
+        pdf.set_font('DejaVu', '', 12)
+        for edu in education:
+            pdf.cell(0, 8, f"- {edu}", ln=True)
+        pdf.ln(5)
 
     # Experience
-    experience = context.get("experience", "")
-    if isinstance(experience, list):
-        experience = "\n".join(experience)
-    pdf.set_font("DejaVu", "", 14)
-    pdf.cell(0, 10, "Experience:", ln=True)
-    pdf.set_font("DejaVu", "", 12)
-    pdf.multi_cell(0, 6, experience)
-    pdf.ln(5)
+    experience = context.get("experience", [])
+    if experience:
+        pdf.set_font('DejaVu', '', 14)
+        pdf.cell(0, 10, "Experience:", ln=True)
+        pdf.set_font('DejaVu', '', 12)
+        for exp in experience:
+            pdf.cell(0, 8, f"- {exp}", ln=True)
+        pdf.ln(5)
 
     # Projects
-    projects = context.get("projects", "")
-    if isinstance(projects, list):
-        projects = "\n".join(projects)
-    pdf.set_font("DejaVu", "", 14)
-    pdf.cell(0, 10, "Projects:", ln=True)
-    pdf.set_font("DejaVu", "", 12)
-    pdf.multi_cell(0, 6, projects)
-    pdf.ln(5)
+    projects = context.get("projects", [])
+    if projects:
+        pdf.set_font('DejaVu', '', 14)
+        pdf.cell(0, 10, "Projects:", ln=True)
+        pdf.set_font('DejaVu', '', 12)
+        for proj in projects:
+            pdf.cell(0, 8, f"- {proj}", ln=True)
+        pdf.ln(5)
 
     # Interests
-    interests = context.get("interests", "")
-    if isinstance(interests, list):
-        interests = ", ".join(interests)
-    pdf.set_font("DejaVu", "", 14)
-    pdf.cell(0, 10, "Interests:", ln=True)
-    pdf.set_font("DejaVu", "", 12)
-    pdf.multi_cell(0, 6, interests)
-    pdf.ln(5)
+    interests = ", ".join(context.get("interests", []))
+    if interests:
+        pdf.set_font('DejaVu', '', 14)
+        pdf.cell(0, 10, "Interests:", ln=True)
+        pdf.set_font('DejaVu', '', 12)
+        pdf.multi_cell(0, 8, interests)
+        pdf.ln(5)
 
     # Social Links
-    pdf.set_font("DejaVu", "", 14)
+    pdf.set_font('DejaVu', '', 14)
     pdf.cell(0, 10, "Social Links:", ln=True)
-    pdf.set_font("DejaVu", "", 12)
+    pdf.set_font('DejaVu', '', 12)
     linkedin = context.get("linkedin", "")
     github = context.get("github", "")
     twitter = context.get("twitter", "")
     if linkedin:
-        pdf.cell(0, 6, f"LinkedIn: {linkedin}", ln=True)
+        pdf.cell(0, 8, f"LinkedIn: {linkedin}", ln=True)
     if github:
-        pdf.cell(0, 6, f"GitHub: {github}", ln=True)
+        pdf.cell(0, 8, f"GitHub: {github}", ln=True)
     if twitter:
-        pdf.cell(0, 6, f"Twitter: {twitter}", ln=True)
+        pdf.cell(0, 8, f"Twitter: {twitter}", ln=True)
 
-    # Output PDF as BytesIO stream (you can save or return it)
     pdf_output = BytesIO()
     pdf.output(pdf_output)
     pdf_output.seek(0)
     return pdf_output
+
+    # # Load Unicode font (font file should be in the same folder or specify full path)
+    # pdf.add_font('DejaVu', '', 'DejaVuSans.ttf', uni=True)
+    # pdf.set_font("DejaVu", "", 20)
+    # pdf.cell(0, 12, txt=context.get("name", "Name"), ln=True, align="C")
+
+    # pdf.set_font("DejaVu", "", 12)
+    # pdf.cell(0, 10, f"Email: {context.get('email', '')}", ln=True, align="C")
+    # pdf.ln(5)
+
+    # # About Me
+    # pdf.set_font("DejaVu", "", 14)
+    # pdf.cell(0, 10, "About Me:", ln=True)
+    # pdf.set_font("DejaVu", "", 12)
+    # pdf.multi_cell(0, 6, context.get("about_me", ""))
+    # pdf.ln(5)
+
+    # # Skills (simple plain text, multiline or comma separated)
+    # skills = context.get("skills", "")
+    # if isinstance(skills, list):
+    #     skills = ", ".join(skills)
+    # pdf.set_font("DejaVu", "", 14)
+    # pdf.cell(0, 10, "Skills:", ln=True)
+    # pdf.set_font("DejaVu", "", 12)
+    # pdf.multi_cell(0, 6, skills)
+    # pdf.ln(5)
+
+    # # Education (multiline text)
+    # education = context.get("education", "")
+    # if isinstance(education, list):
+    #     education = "\n".join(education)
+    # pdf.set_font("DejaVu", "", 14)
+    # pdf.cell(0, 10, "Education:", ln=True)
+    # pdf.set_font("DejaVu", "", 12)
+    # pdf.multi_cell(0, 6, education)
+    # pdf.ln(5)
+
+    # # Experience
+    # experience = context.get("experience", "")
+    # if isinstance(experience, list):
+    #     experience = "\n".join(experience)
+    # pdf.set_font("DejaVu", "", 14)
+    # pdf.cell(0, 10, "Experience:", ln=True)
+    # pdf.set_font("DejaVu", "", 12)
+    # pdf.multi_cell(0, 6, experience)
+    # pdf.ln(5)
+
+    # # Projects
+    # projects = context.get("projects", "")
+    # if isinstance(projects, list):
+    #     projects = "\n".join(projects)
+    # pdf.set_font("DejaVu", "", 14)
+    # pdf.cell(0, 10, "Projects:", ln=True)
+    # pdf.set_font("DejaVu", "", 12)
+    # pdf.multi_cell(0, 6, projects)
+    # pdf.ln(5)
+
+    # # Interests
+    # interests = context.get("interests", "")
+    # if isinstance(interests, list):
+    #     interests = ", ".join(interests)
+    # pdf.set_font("DejaVu", "", 14)
+    # pdf.cell(0, 10, "Interests:", ln=True)
+    # pdf.set_font("DejaVu", "", 12)
+    # pdf.multi_cell(0, 6, interests)
+    # pdf.ln(5)
+
+    # # Social Links
+    # pdf.set_font("DejaVu", "", 14)
+    # pdf.cell(0, 10, "Social Links:", ln=True)
+    # pdf.set_font("DejaVu", "", 12)
+    # linkedin = context.get("linkedin", "")
+    # github = context.get("github", "")
+    # twitter = context.get("twitter", "")
+    # if linkedin:
+    #     pdf.cell(0, 6, f"LinkedIn: {linkedin}", ln=True)
+    # if github:
+    #     pdf.cell(0, 6, f"GitHub: {github}", ln=True)
+    # if twitter:
+    #     pdf.cell(0, 6, f"Twitter: {twitter}", ln=True)
+
+    # # Output PDF as BytesIO stream (you can save or return it)
+    # pdf_output = BytesIO()
+    # pdf.output(pdf_output)
+    # pdf_output.seek(0)
+    # return pdf_output
 
 
 
