@@ -1,0 +1,252 @@
+<!-- PROFESSIONAL SMART CV TEMPLATE WITH CENTERED HEADINGS -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Professional Smart CV</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 40px 20px;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 50px;
+      padding: 40px 50px;
+      flex-wrap: nowrap;
+    }
+
+    .left-column {
+      width: 40%;
+      border-right: 1px solid #e1e4e8;
+      padding-right: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .right-column {
+      width: 60%;
+      padding-left: 30px;
+    }
+
+    .profile-pic {
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 4px solid #009b72;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .name {
+      font-size: 28px;
+      font-weight: 700;
+      color: #005f40;
+      text-align: center;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+
+    .email {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .social-icons a {
+      font-size: 20px;
+      color: #444;
+      transition: color 0.3s ease;
+    }
+
+    .social-icons a:hover {
+      color: #009b72;
+    }
+
+    .section, .section-right {
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    .section h3, .section-right h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #007a5c;
+      border-bottom: 2px solid #e1e4e8;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .section p, .section-right p {
+      font-size: 14px;
+      color: #444;
+      margin: 0;
+    }
+
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .skill-badge {
+      background: #d9f0e6;
+      color: #007a5c;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 12px;
+    }
+
+    .projects-list {
+      list-style: disc inside;
+      padding-left: 0;
+      color: #444;
+    }
+
+    .projects-list li {
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .experience-block {
+      margin-bottom: 20px;
+    }
+
+    .job-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #007a5c;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .company-duration {
+      font-size: 13px;
+      font-style: italic;
+      color: #666;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .job-description {
+      font-size: 14px;
+      color: #444;
+      margin: 0;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 30px 20px;
+      }
+      .left-column, .right-column {
+        width: 100%;
+        padding: 0;
+        border: none;
+      }
+      .right-column {
+        margin-top: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- LEFT COLUMN -->
+  <div class="left-column">
+    <img class="profile-pic" src="{{ profile_image_url }}" alt="Profile Image" />
+    <div class="name">{{ name }}</div>
+    <div class="email"><i class="fas fa-envelope"></i> {{ email }}</div>
+
+    <div class="social-icons">
+      {% if twitter %}<a href="{{ twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>{% endif %}
+      {% if github %}<a href="{{ github }}" target="_blank"><i class="fab fa-github"></i></a>{% endif %}
+      {% if linkedin %}<a href="{{ linkedin }}" target="_blank"><i class="fab fa-linkedin"></i></a>{% endif %}
+    </div>
+
+    <div class="section">
+      <h3>About Me</h3>
+      <p>{{ about_me }}</p>
+    </div>
+
+    <div class="section">
+      <h3>Education</h3>
+      <p>{{ education }}</p>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="right-column">
+
+    <div class="section-right">
+      <h3>Experience</h3>
+      {% if experience is iterable and experience is not string %}
+        {% for job in experience %}
+        <div class="experience-block">
+          <div class="job-title">{{ job.title }}</div>
+          <div class="company-duration">{{ job.company }} | {{ job.duration }}</div>
+          <div class="job-description">{{ job.description }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p>{{ experience }}</p>
+      {% endif %}
+    </div>
+
+    <div class="section-right">
+      <h3>Projects</h3>
+      <ul class="projects-list">
+        {% for project in projects %}
+          <li>{{ project }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="section-right">
+      <h3>Skills</h3>
+      <div class="skills-list">
+        {% for skill in skills.split(',') %}
+          <span class="skill-badge">{{ skill.strip() }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="section-right">
+      <h3>Interests</h3>
+      <p>{{ interests }}</p>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

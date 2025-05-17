@@ -1,161 +1,229 @@
-Smart Resume Analyzer – Professional Resume Analyzer 
-Developed by: Muhammad Soban Saud  
+
+🚀 Smart Resume Analyzer – Professional AI-Powered Resume Builder
+===========================================================
+Developed by: Muhammad Soban Saud
+
+🔗 Live App: https://smartresumeanalyzerpro-soban.streamlit.app/
+
+🔐 Admin Credentials:
+Email: sobansaud3@gmail.com
+Password: soban123
 
 
-Streamlit Link :- [https://smartresumeanalyzerpro-soban.streamlit.app/]
+🔍 What is Smart Resume Analyzer?
+--------------------------------
+Smart Resume Analyzer is a cutting-edgeAI-powered web application designed to help job seekers transform their resumes into professional, job-winning documents , Developed as part of a $10 Web App Challenge .  Built entirely using Object-Oriented Programming (OOP) in Python, the app ensures modular, scalable, and efficient functionality across all its features.
+
+This platform combines real-time resume analysis, intelligent keyword extraction, and AI-enhanced suggestions to help users stand out in the job market. With a built-in authentication system and a smooth lifetime premium unlock via both Stripe and manual Easypaisa/JazzCash payments, Smart Resume Analyzer delivers a seamless experience for users globally.
+
+Whether you're a student, a fresh graduate, or a professional looking to upgrade your CV, Smart Resume Analyzer provides both free and premium tools, including:
+
+Real-time skill matching
+
+Personalized suggestions
+
+Beautiful AI-generated CVs
+
+Resume scoring and insights
+
+Secure user login & session management
+
+Admin-verified premium unlock system
+
+All of this is delivered through a modern UI built in Streamlit, with backend logic powered by cleanly structured OOP classes
+
+--------------------------------
+
+(✨ Key Highlights)
+✅ AI-powered resume parsing and scoring
+
+📊 Real-time skill extraction and keyword frequency charts
+
+🧠 Personalized improvement suggestions
+
+🔒 Secure login system (email/password)
+
+💳 Manual & Stripe payment integration
+
+🛠️ Admin dashboard to manage and verify users
+
+🌟 Premium AI CV Generator – create a beautiful, professional CV in seconds
+
+--------------------------------
+
+(🆓 Free Features)
+
+Upload resume (PDF format)
+
+Extract keywords & skills
+
+Resume score (out of 100)
+
+WordCloud + skill frequency chart
+
+Instant suggestions to improve resume, experience, and projects
+--------------------------------
+
+💎 Premium Features (One-Time Rs. 300 / Stripe Payment)
+
+Once verified, you unlock:
+
+✅ AI CV Generator
+Get a professionally formatted CV, beautifully written using generative AI, and downloaded in PDF format using HTML/CSS-styled templates.
+
+📄 Downloadable resume feedback PDF
+
+🔍 Smart job match insights (coming soon)
+
+♾️ Lifetime access to all future premium tools
+
+--------------------------------
+
+(🔐 Authentication System)
+Sign up/sign in using email + password
+
+Credentials stored securely in data/users.csv
+
+Active sessions handled using Streamlit session_state
+
+Premium access tracked via premium_userss.csv
+
+--------------------------------
+
+💰 Payment Process – Manual & Stripe
+🟢 Option 1: Easypaisa / JazzCash (Manual)
+Amount: Rs. 900 or 3$ (one-time)
+
+Send screenshot, name & phone after payment
+
+Details stored in payments.csv
+
+Admin verifies manually
+
+Once approved, email is added to premium_userss.csv
+
+Access unlocked on next login
+--------------------------------
 
 
-Dashboard credential :- sobansaud3@gmail.com
-soban123
+🟣 Option 2: Stripe Payment (International)
+Secure, real-time Stripe payment support added
+
+After Stripe payment, your email is automatically logged
+
+Admin sees it in the dashboard and verifies it
+
+Once verified, you gain access to Premium Tools instantly
+--------------------------------
 
 
+🛠️ Admin Dashboard (admin_dashboard.py)
+View pending payments (manual or Stripe)
 
-Smart Resume Analyzer is a powerful, AI-driven web application that helps job seekers improve their resumes with data-backed suggestions, real-time skill analysis, and premium tools. Developed as part of a $10 Web App Challenge, this project demonstrates a complete system built with Python (OOP), Streamlit,Authentication  and manual payment integration (Easypaisa & JazzCash), offering both free and premium career tools.
+One-click Verify to approve access
 
+Email is added to premium_userss.csv
 
-(Key Highlights):-
+User sees "🌟 Premium Tools" tab on app refresh
+--------------------------------
 
-AI-powered resume parsing and scoring.
+🗂️ Important Files Used
+File	Description
+users.csv	Stores user credentials
+payments.csv	Stores manual payment info
+premium_userss.csv	Verified premium users
+skills.csv	Resume skills database
+template.html	Beautiful AI CV layout
+main.py	Streamlit main app(auth,stripe,premium tools etc)
+admin_dashboard.py	Admin control panel
 
-Instant skill extraction & personalized suggestions.
+--------------------------------
 
-Manual payment verification system with lifetime premium access.
+🧰 Tech Stack
+Python (OOP): Modular, class-based backend logic
 
-Admin dashboard for managing users and payment verification.
+Streamlit: Modern frontend and routing
 
+FPDF: Exporting resume feedback as PDFs
 
+HTML/CSS Templates: Stylish CV layouts
 
-What Does Smart Resume Analyzer Offer?
------------------------
-(Free Features)
+Plotly + WordCloud: Data visualizations
 
-Upload your resume (PDF format)
+Pandas: File and data operations
 
-Automatically extract skills and keywords
-
-Resume optimization score out of 100
-
-Visual skill frequency chart & word cloud
-
-Suggestions to improve experience and projects
------------------------
-
-Premium Features (Rs. 300 One-Time Payment)
-
-Currently, once verified, you’ll receive a professionally written AI-generated CV directly to your email address.
-
-(Coming Soon for Premium Users):
-
-- Downloadable resume feedback PDF with expert formatting
-- Smart job match insights (powered by mock data or AI)
-- Lifetime access to future premium updates
-
---------------------------
-
-(Authentication System)
-Admin Login Email :- sobansaud3@gmail.com
-Admin Login Password :- soban123
-
-- Sign up and sign in using email and password
-- Credentials stored securely in `data/users.csv`
-- Session state used to manage active login
-- Premium access is verified using `premium_userss.csv
-
--------------------------
-
-Payment Process (Manual)
-
-- One-time payment of Rs. 300 via Easypaisa or JazzCash
-- User submits:
-  • Phone number  
-  • Account holder name  
-  • Screenshot of the transaction  
-- Details stored in `data/payments.csv`
-- Admin verifies manually through admin dashboard
-- Verified emails are added to `premium_userss.csv`
-- Premium features are unlocked automatically on next login
-
-Payment Details:
-Easypaisa/JazzCash: 0323-2204085  
-Amount: Rs. 300
-
-------------------------
+Cohere AI (Cohere): For generating AI CVs
+--------------------------------
 
 
+🧭 How It Works (Step-by-Step)
+User opens the app, greeted by animated welcome screen with logo
 
-Admin Dashboard Workflow
+Signs up / logs in with email & password
 
-- Admin launches the dashboard (`admin_dashboard.py`)
-- Sees submitted payment requests from users
-- Verifies each payment manually by clicking "Verify"
-- Upon verification, the user’s email is saved to `premium_userss.csv`
-- User gains access to Premium Tools instantly on app refresh
+Uploads PDF resume
 
-Admin Tools:
-- View all pending payment requests
-- Mark users as verified with a button click
-- System automatically updates access based on `premium_userss.csv`
+ResumeReader class extracts text
 
----
+SkillMatcher compares skills to dataset
 
-(Files Used)
+Resume is scored, chart & word cloud generated
 
-- `users.csv`: Stores user credentials
-- `payments.csv`: Stores submitted payment info
-- `premium_userss.csv`: Tracks verified premium users
-- `skills.csv`: Contains the dataset of recognized skills
+Suggestions shown to enhance resume
 
----
+User can pay manually or via Stripe
 
-(Technology Stack)
+Admin verifies, and unlocks premium tools
 
-- Python (OOP): Classes for resume reading, scoring, and suggestions
-- Streamlit: Web app interface
-- FPDF: PDF report generation
-- Plotly & WordCloud: Visualization tools
-- Pandas: Data management and filtering
-- Google Generative AI (Gemini): For generating AI-based CVs(coming soon)
-
----
-
----
-
-(How It Works – Step-by-Step)
-
-1. User lands on the app, sees the animated logo screen
-2. Signs up or logs in using email and password
-3. Uploads resume (PDF only)
-4. Resume text is extracted using the ResumeReader class
-5. Skills are identified and compared with the skills dataset
-6. Resume score is calculated with scoring logic
-7. Word cloud and frequency charts are generated
-8. Suggestions are shown for improving resume
-9. If user pays and is verified:
-   - Unlocks Premium Tools tab
-   - Can Receive AI CVs, download feedback PDFs, and more tools are coming soon 
-
----
-
-(Why This Project Stands Out):-
-
-- Clean design with animated branding screen
-- Built entirely with Object-Oriented Programming
-- Manual yet secure payment integration (without Stripe or DB)
-- Offers real-world AI-enhanced resume feedback
-- Simple admin panel for verifying payments
-- All data handled through lightweight CSVs
-
----
-
-(Assignment Context)
-
-This project was created as part of a $10 assignment challenge:
-- Python backend with OOP design
-- Streamlit as frontend
-- Manual payment system using Easypaisa/JazzCash
-- Target: Build a useful, real-world freelancing-ready product
-
----
+User accesses tools like AI CV Generator, downloads PDF CV
+--------------------------------
 
 
+🌟 Why Smart Resume Analyzer?
+✅ Built using clean OOP architecture
 
+🎨 Beautiful UI with animations and logo branding
+
+💸 Works with manual and Stripe payment
+
+🤖 Offers real-world AI-generated resumes
+
+👨‍💻 Lightweight admin dashboard, no database used
+
+💡 All data handled via simple CSVs
+-----------------------------------
+
+📝 Challenge Context
+Smart Resume Analyzer was built as part of a competitive $10 Web App Assignment Challenge, with the aim of delivering a real-world, freelancing-ready product using minimal resources.
+
+Despite the strict constraints, the project successfully integrates:
+
+✅ Backend in Python using a clean Object-Oriented Programming (OOP) architecture
+
+✅ Streamlit Frontend with modern UI, animated branding, and intuitive user experience
+
+✅ Secure Email-Based Authentication System
+
+User sign-up/login using email and password
+
+Session management with Streamlit's built-in state handling
+
+User data securely stored in lightweight CSVs
+
+✅ Dual Payment Integration
+
+Manual Payment System via Easypaisa & JazzCash
+
+Stripe Support for international users
+
+✅ Admin Dashboard for manual verification and premium access control
+
+✅ AI-Powered Career Tools: Resume parsing, scoring, and a premium AI-generated CV generator
+
+✅ Freelancing-Ready UI/UX with animated splash screen and professional visualizations
+
+This project stands out as a complete, client-ready web solution demonstrating strong command over Python, AI integration, authentication, and both local/international payment handling — all packaged into a polished, real-world tool.
+-------------------------------
+
+📌 Developer: Muhammad Soban Saud
+📬 Email: sobansaud3@gmail.com

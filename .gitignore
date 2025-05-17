@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints
+
+# MacOS and system files
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Env files
+.env
+
+# VSCode settings (if you're using it)
+.vscode/
+
+# Logs
+*.log
+
+# Compiled files
+*.pyc
+
+# CSVs (optional - if you want to ignore user data, remove if not needed)
+data/*.csv

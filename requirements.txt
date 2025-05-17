@@ -10,3 +10,9 @@ fitz
 numpy
 pillow
 PyMuPDF
+cohere
+stripe
+base64
+pdfkit
+jinja2
+
