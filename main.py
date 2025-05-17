@@ -414,7 +414,6 @@ import matplotlib.pyplot as plt
 from components.ai_cv_generator import generate_cv_cohere_chat
 import plotly.graph_objects as go
 from dotenv import load_dotenv
-# from fpdf import FPDF
 import base64
 import streamlit.components.v1 as components
 from components.resume_reader import Resume_reader
@@ -526,20 +525,38 @@ load_dotenv()
 #     return output_filename
 
 
+# def render_pdf_from_template(template_name, context, output_filename):
+#     # Load HTML from Jinja2 template
+#     env = Environment(loader=FileSystemLoader("templates"))
+#     template = env.get_template(template_name)
+#     html_content = template.render(context)
+
+#     # Convert HTML to PDF using xhtml2pdf
+#     result_file = open(output_filename, "w+b")
+#     pisa_status = pisa.CreatePDF(io.StringIO(html_content), dest=result_file)
+#     result_file.close()
+    
+#     if pisa_status.err:
+#         raise Exception("Failed to generate PDF")
+    
+#     return output_filename
+
+
 def render_pdf_from_template(template_name, context, output_filename):
-    # Load HTML from Jinja2 template
+    # Load and render HTML from Jinja2 template
     env = Environment(loader=FileSystemLoader("templates"))
     template = env.get_template(template_name)
     html_content = template.render(context)
 
     # Convert HTML to PDF using xhtml2pdf
-    result_file = open(output_filename, "w+b")
-    pisa_status = pisa.CreatePDF(io.StringIO(html_content), dest=result_file)
-    result_file.close()
-    
-    if pisa_status.err:
-        raise Exception("Failed to generate PDF")
-    
+    with open(output_filename, "wb") as result_file:
+        # Convert string HTML to bytes stream
+        pdf_status = pisa.CreatePDF(io.BytesIO(html_content.encode('utf-8')), dest=result_file)
+
+    if pdf_status.err:
+        # Raise error with details for debugging
+        raise Exception(f"Failed to generate PDF, error code: {pdf_status.err}")
+
     return output_filename
 
 def get_pdf_download_link(pdf_file):
