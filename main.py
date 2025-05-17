@@ -844,7 +844,8 @@ def render_pdf_from_data(context):
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(0, 10, "About Me:", ln=True)
         pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(pdf.epw, 8, about)
+        epw = pdf.w - 2 * pdf.l_margin
+        pdf.multi_cell(epw, 8, about)
         pdf.ln(5)
 
     # Skills
