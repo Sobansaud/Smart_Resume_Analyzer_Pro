@@ -852,14 +852,14 @@ def render_pdf_from_data(context):
         pdf.ln(5)
 
     # Skills
-    skills = ", ".join(context.get("skills", []))
+    skills = clean_text(context.get("skills", ""))
     if skills:
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(0, 10, "Skills:", ln=True)
         pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(epw, 8, clean_text(skills))
-        pdf.ln(5)
+        pdf.multi_cell(epw, 8, skills)
 
+    
     # Education / Experience / Projects
     for section_title, items in [
         ("Education", context.get("education", [])),
