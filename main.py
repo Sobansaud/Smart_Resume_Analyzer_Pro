@@ -407,7 +407,7 @@ from collections import Counter
 # from jinja2 import Environment, FileSystemLoader
 import jinja2
 # from xhtml2pdf import pisa
-from weasyprint import HTML
+# from weasyprint import HTML
 # import pdfkit
 # import platform
 import stripe
