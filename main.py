@@ -543,19 +543,114 @@ load_dotenv()
     
 #     return output_filename
 
+# def render_pdf_from_data(context):
+#     pdf = FPDF()
+#     pdf.add_page()
+
+#     # Font file path
+#     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
+#     if not os.path.isfile(font_path):
+#         raise FileNotFoundError(f"Font file not found: {font_path}")
+
+#     # Add font once
+#     # pdf.add_font('DejaVu', '', font_path, uni=True)
+#     # pdf.set_font('DejaVu', '', 20)
+#     pdf.set_font("Arial", size=12)  # Arial is built-in, no TTF needed
+
+
+#     pdf.cell(0, 15, txt=context.get("name", "Name"), ln=True, align="C")
+
+#     pdf.set_font('DejaVu', '', 12)
+#     pdf.cell(0, 10, txt=f"Email: {context.get('email', '')}", ln=True, align="C")
+#     pdf.ln(5)
+
+#     pdf.set_font('DejaVu', '', 14)
+#     pdf.cell(0, 10, "About Me:", ln=True)
+#     pdf.set_font('DejaVu', '', 12)
+#     pdf.multi_cell(0, 8, context.get("about_me", ""))
+#     pdf.ln(5)
+
+#     # Skills
+#     skills = ", ".join(context.get("skills", []))
+#     if skills:
+#         pdf.set_font('DejaVu', '', 14)
+#         pdf.cell(0, 10, "Skills:", ln=True)
+#         pdf.set_font('DejaVu', '', 12)
+#         pdf.multi_cell(0, 8, skills)
+#         pdf.ln(5)
+
+#     # Education
+#     education = context.get("education", [])
+#     if education:
+#         pdf.set_font('DejaVu', '', 14)
+#         pdf.cell(0, 10, "Education:", ln=True)
+#         pdf.set_font('DejaVu', '', 12)
+#         for edu in education:
+#             pdf.cell(0, 8, f"- {edu}", ln=True)
+#         pdf.ln(5)
+
+#     # Experience
+#     experience = context.get("experience", [])
+#     if experience:
+#         pdf.set_font('DejaVu', '', 14)
+#         pdf.cell(0, 10, "Experience:", ln=True)
+#         pdf.set_font('DejaVu', '', 12)
+#         for exp in experience:
+#             pdf.cell(0, 8, f"- {exp}", ln=True)
+#         pdf.ln(5)
+
+#     # Projects
+#     projects = context.get("projects", [])
+#     if projects:
+#         pdf.set_font('DejaVu', '', 14)
+#         pdf.cell(0, 10, "Projects:", ln=True)
+#         pdf.set_font('DejaVu', '', 12)
+#         for proj in projects:
+#             pdf.cell(0, 8, f"- {proj}", ln=True)
+#         pdf.ln(5)
+
+#     # Interests
+#     interests = ", ".join(context.get("interests", []))
+#     if interests:
+#         pdf.set_font('DejaVu', '', 14)
+#         pdf.cell(0, 10, "Interests:", ln=True)
+#         pdf.set_font('DejaVu', '', 12)
+#         pdf.multi_cell(0, 8, interests)
+#         pdf.ln(5)
+
+#     # Social Links
+#     pdf.set_font('DejaVu', '', 14)
+#     pdf.cell(0, 10, "Social Links:", ln=True)
+#     pdf.set_font('DejaVu', '', 12)
+#     linkedin = context.get("linkedin", "")
+#     github = context.get("github", "")
+#     twitter = context.get("twitter", "")
+#     if linkedin:
+#         pdf.cell(0, 8, f"LinkedIn: {linkedin}", ln=True)
+#     if github:
+#         pdf.cell(0, 8, f"GitHub: {github}", ln=True)
+#     if twitter:
+#         pdf.cell(0, 8, f"Twitter: {twitter}", ln=True)
+
+#     # Output PDF to BytesIO buffer
+#     pdf_bytes = pdf.output(dest='S').encode('latin1')
+#     pdf_output = BytesIO(pdf_bytes)
+#     return pdf_output
+
+def safe_multi_cell(pdf, text, line_height=8, max_chunk=500):
+    for i in range(0, len(text), max_chunk):
+        pdf.multi_cell(0, line_height, text[i:i+max_chunk])
+
 def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
 
-    # Font file path
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
 
-    # Add font once
     pdf.add_font('DejaVu', '', font_path, uni=True)
     pdf.set_font('DejaVu', '', 20)
-
     pdf.cell(0, 15, txt=context.get("name", "Name"), ln=True, align="C")
 
     pdf.set_font('DejaVu', '', 12)
@@ -565,16 +660,17 @@ def render_pdf_from_data(context):
     pdf.set_font('DejaVu', '', 14)
     pdf.cell(0, 10, "About Me:", ln=True)
     pdf.set_font('DejaVu', '', 12)
-    pdf.multi_cell(0, 8, context.get("about_me", ""))
+    safe_multi_cell(pdf, context.get("about_me", ""))
     pdf.ln(5)
 
-    # Skills
+    # Repeat safe_multi_cell for other multi_cell calls similarly
+    # For example, Skills:
     skills = ", ".join(context.get("skills", []))
     if skills:
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(0, 10, "Skills:", ln=True)
         pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(0, 8, skills)
+        safe_multi_cell(pdf, skills)
         pdf.ln(5)
 
     # Education
@@ -613,7 +709,7 @@ def render_pdf_from_data(context):
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(0, 10, "Interests:", ln=True)
         pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(0, 8, interests)
+        safe_multi_cell(pdf, interests)
         pdf.ln(5)
 
     # Social Links
@@ -630,10 +726,9 @@ def render_pdf_from_data(context):
     if twitter:
         pdf.cell(0, 8, f"Twitter: {twitter}", ln=True)
 
-    # Output PDF to BytesIO buffer
     pdf_bytes = pdf.output(dest='S').encode('latin1')
-    pdf_output = BytesIO(pdf_bytes)
-    return pdf_output
+    return BytesIO(pdf_bytes)
+
 
 
 
