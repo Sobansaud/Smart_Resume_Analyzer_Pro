@@ -770,7 +770,6 @@ load_dotenv()
 
 #     # Output as BytesIO
 #     return BytesIO(pdf.output(dest='S').encode('latin1', 'ignore'))
-
 from fpdf import FPDF
 import os
 from io import BytesIO
@@ -787,84 +786,102 @@ def clean_text(text):
 def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
+    epw = pdf.w - 2 * pdf.l_margin
 
-    # Load font
+    # Font setup
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
     pdf.add_font('DejaVu', '', font_path, uni=True)
-
-    pdf.set_font('DejaVu', '', 22)
-    pdf.set_text_color(20, 20, 60)
-    pdf.cell(0, 12, txt=clean_text(context.get("name", "John Doe")), ln=True, align="C")
-
     pdf.set_font('DejaVu', '', 12)
-    pdf.set_text_color(100, 100, 100)
-    pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', 'example@email.com'))}", ln=True, align="C")
 
-    # Profile image section (user provided)
-    image_path = context.get("profile_pic")  # user-provided path
-    if image_path and os.path.isfile(image_path):
-        pdf.image(image_path, x=85, y=pdf.get_y() + 5, w=40)
-        pdf.ln(45)
+    # Profile Picture (optional)
+    image_file = context.get("profile_image")
+    if image_file:
+        try:
+            temp_img_path = "temp_profile.jpg"
+            with open(temp_img_path, "wb") as f:
+                f.write(image_file.read())
+            pdf.image(temp_img_path, x=85, y=pdf.get_y(), w=40, h=40)
+            os.remove(temp_img_path)
+            pdf.ln(45)
+        except Exception as e:
+            print("Image error:", e)
+            pdf.ln(10)
     else:
         pdf.ln(10)
 
-    # Layout setup
-    page_width = pdf.w - 20
-    col1_width = page_width * 0.42
-    col2_width = page_width * 0.53
-    margin_x = 10
-    x_col2 = margin_x + col1_width + 8
-    y_start = pdf.get_y()
-    line_height = 6
+    # Name & Email (centered)
+    pdf.set_font('DejaVu', '', 20)
+    pdf.cell(0, 10, txt=clean_text(context.get("name", "John Doe")), ln=True, align="C")
+    pdf.set_font('DejaVu', '', 12)
+    pdf.cell(0, 8, txt=f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
+    pdf.ln(6)
 
-    # Center divider
-    center_line = margin_x + col1_width + 4
-    pdf.set_draw_color(220, 220, 220)
-    pdf.line(center_line, y_start, center_line, 280)
+    # Draw center line to simulate column separation
+    center_x = pdf.w / 2
+    pdf.set_draw_color(180, 180, 180)
+    pdf.line(center_x, pdf.get_y(), center_x, 270)
 
-    def section(x, y, w, title, content, is_list=False):
+    # Function to add section in two-column layout
+    def add_section(title, content, is_list=False, left=True):
+        col_width = epw / 2 - 5
+        x = pdf.l_margin if left else pdf.l_margin + epw / 2 + 5
+        y = pdf.get_y()
+
         pdf.set_xy(x, y)
-        pdf.set_font('DejaVu', '', 13)
-        pdf.set_text_color(0, 0, 80)
-        pdf.cell(w, 8, txt=title, ln=True)
-
+        pdf.set_font('DejaVu', '', 14)
+        pdf.cell(col_width, 10, f"{title}:", ln=True)
         pdf.set_font('DejaVu', '', 11)
-        pdf.set_text_color(30, 30, 30)
+        pdf.set_x(x)
+
         if is_list and isinstance(content, list):
             for item in content:
+                pdf.multi_cell(col_width, 6, f"• {clean_text(item)}", ln=1)
                 pdf.set_x(x)
-                pdf.multi_cell(w, line_height, f"• {clean_text(item)}")
         else:
-            pdf.set_x(x)
-            pdf.multi_cell(w, line_height, clean_text(content))
-        pdf.ln(1)
-        return pdf.get_y()
+            pdf.multi_cell(col_width, 6, clean_text(content), ln=1)
+        pdf.ln(3)
 
-    # LEFT COLUMN SECTIONS
-    y_left = y_start
-    y_left = section(margin_x, y_left, col1_width, "About Me", context.get("about_me", ""), is_list=False)
-    y_left = section(margin_x, y_left, col1_width, "Skills", context.get("skills", []), is_list=True)
-    y_left = section(margin_x, y_left, col1_width, "Interests", context.get("interests", []), is_list=True)
+    # Two-column layout
+    left_data = [
+        ("About Me", context.get("about_me"), False),
+        ("Education", context.get("education", []), True),
+        ("Projects", context.get("projects", []), True),
+    ]
+    right_data = [
+        ("Skills", context.get("skills", []), True),
+        ("Experience", context.get("experience", []), True),
+        ("Interests", context.get("interests", []), True),
+    ]
 
-    # Social Links
+    y_start = pdf.get_y()
+    pdf.set_y(y_start)
+    for idx, (title, content, is_list) in enumerate(left_data):
+        pdf.set_y(y_start + idx * 35)
+        add_section(title, content, is_list, left=True)
+
+    pdf.set_y(y_start)
+    for idx, (title, content, is_list) in enumerate(right_data):
+        pdf.set_y(y_start + idx * 35)
+        add_section(title, content, is_list, left=False)
+
+    # Social Links (full width)
     links = []
-    for p in ["linkedin", "github", "twitter", "portfolio"]:
-        link = context.get(p)
+    for platform in ["linkedin", "github", "twitter"]:
+        link = context.get(platform)
         if link:
-            links.append(f"{p.capitalize()}: {link}")
-    y_left = section(margin_x, y_left, col1_width, "Social Links", links, is_list=True)
+            links.append(f"{platform.capitalize()}: {link}")
+    if links:
+        pdf.ln(8)
+        pdf.set_font('DejaVu', '', 13)
+        pdf.cell(0, 10, "Social Links:", ln=True)
+        pdf.set_font('DejaVu', '', 11)
+        for link in links:
+            pdf.cell(0, 8, f"- {clean_text(link)}", ln=True)
 
-    # RIGHT COLUMN SECTIONS
-    y_right = y_start
-    y_right = section(x_col2, y_right, col2_width, "Education", context.get("education", []), is_list=True)
-    y_right = section(x_col2, y_right, col2_width, "Experience", context.get("experience", []), is_list=True)
-    y_right = section(x_col2, y_right, col2_width, "Projects", context.get("projects", []), is_list=True)
-
-    # Final output
-    return BytesIO(pdf.output(dest='S').encode('latin1', 'ignore'))
-
+    pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
+    return BytesIO(pdf_output)
 
 def get_pdf_download_link(pdf_file):
     with open(pdf_file, "rb") as f:
