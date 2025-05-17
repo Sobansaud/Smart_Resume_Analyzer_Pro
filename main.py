@@ -814,7 +814,6 @@ from fpdf import FPDF
 from io import BytesIO
 import unicodedata
 import os
-
 def clean_text(text):
     try:
         return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
@@ -825,15 +824,20 @@ def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
 
+    # Manually calculate Effective Page Width (for fpdf v1.x)
+    epw = pdf.w - 2 * pdf.l_margin
+
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
 
     pdf.add_font('DejaVu', '', font_path, uni=True)
-    
+
+    # Name
     pdf.set_font('DejaVu', '', 20)
     pdf.cell(0, 15, txt=clean_text(context.get("name", "Name")), ln=True, align="C")
 
+    # Email
     pdf.set_font('DejaVu', '', 12)
     pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', ''))}", ln=True, align="C")
     pdf.ln(10)
@@ -844,7 +848,6 @@ def render_pdf_from_data(context):
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(0, 10, "About Me:", ln=True)
         pdf.set_font('DejaVu', '', 12)
-        epw = pdf.w - 2 * pdf.l_margin
         pdf.multi_cell(epw, 8, about)
         pdf.ln(5)
 
@@ -854,7 +857,7 @@ def render_pdf_from_data(context):
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(0, 10, "Skills:", ln=True)
         pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(pdf.epw, 8, clean_text(skills))
+        pdf.multi_cell(epw, 8, clean_text(skills))
         pdf.ln(5)
 
     # Education / Experience / Projects
@@ -868,7 +871,7 @@ def render_pdf_from_data(context):
             pdf.cell(0, 10, f"{section_title}:", ln=True)
             pdf.set_font('DejaVu', '', 12)
             for item in items:
-                pdf.multi_cell(pdf.epw, 8, f"• {clean_text(item)}")
+                pdf.multi_cell(epw, 8, f"• {clean_text(item)}")
             pdf.ln(5)
 
     # Interests
@@ -877,7 +880,7 @@ def render_pdf_from_data(context):
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(0, 10, "Interests:", ln=True)
         pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(pdf.epw, 8, clean_text(interests))
+        pdf.multi_cell(epw, 8, clean_text(interests))
         pdf.ln(5)
 
     # Social Links
@@ -887,7 +890,7 @@ def render_pdf_from_data(context):
     for platform in ["linkedin", "github", "twitter"]:
         link = context.get(platform, "")
         if link:
-            pdf.multi_cell(pdf.epw, 8, f"{platform.capitalize()}: {clean_text(link)}")
+            pdf.multi_cell(epw, 8, f"{platform.capitalize()}: {clean_text(link)}")
 
     # Generate PDF in memory
     pdf_output = pdf.output(dest='S').encode('latin1')
