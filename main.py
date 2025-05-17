@@ -407,10 +407,13 @@ from collections import Counter
 # from jinja2 import Environment, FileSystemLoader
 import jinja2
 # from xhtml2pdf import pisa
-from weasyprint import HTML
+# from weasyprint import HTML
 # import pdfkit
 # import platform
 import stripe
+from xhtml2pdf import pisa
+from jinja2 import Environment, FileSystemLoader
+import io
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from components.ai_cv_generator import generate_cv_cohere_chat
@@ -515,16 +518,33 @@ load_dotenv()
 #     return output_filename
 
 
-def render_pdf_from_template(template_path, context, output_filename):
-    # Render HTML with Jinja2
-    template_loader = jinja2.FileSystemLoader(searchpath="./templates")
-    env = jinja2.Environment(loader=template_loader)
-    template = env.get_template(template_path)
+# def render_pdf_from_template(template_path, context, output_filename):
+#     # Render HTML with Jinja2
+#     template_loader = jinja2.FileSystemLoader(searchpath="./templates")
+#     env = jinja2.Environment(loader=template_loader)
+#     template = env.get_template(template_path)
+#     html_content = template.render(context)
+
+#     # Generate PDF using WeasyPrint
+#     HTML(string=html_content).write_pdf(output_filename)
+
+#     return output_filename
+
+
+def render_pdf_from_template(template_name, context, output_filename):
+    # Load HTML from Jinja2 template
+    env = Environment(loader=FileSystemLoader("templates"))
+    template = env.get_template(template_name)
     html_content = template.render(context)
 
-    # Generate PDF using WeasyPrint
-    HTML(string=html_content).write_pdf(output_filename)
-
+    # Convert HTML to PDF using xhtml2pdf
+    result_file = open(output_filename, "w+b")
+    pisa_status = pisa.CreatePDF(io.StringIO(html_content), dest=result_file)
+    result_file.close()
+    
+    if pisa_status.err:
+        raise Exception("Failed to generate PDF")
+    
     return output_filename
 
 def get_pdf_download_link(pdf_file):
