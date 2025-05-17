@@ -736,6 +736,10 @@ load_dotenv()
 
 
 
+from fpdf import FPDF
+from io import BytesIO
+import unicodedata
+import os
 
 def clean_text(text):
     try:
@@ -802,11 +806,10 @@ def render_pdf_from_data(context):
         if link:
             pdf.multi_cell(0, 8, f"{platform.capitalize()}: {clean_text(link)}")
 
-    # Output to BytesIO directly
-    pdf_buffer = BytesIO()
-    pdf.output(pdf_buffer)
-    pdf_buffer.seek(0)
-    return pdf_buffer
+    # ✅ THIS PART FIXES THE ERROR:
+    pdf_output = pdf.output(dest='S').encode('latin1')  # Or .encode('utf-8') if you know your chars are safe
+    return BytesIO(pdf_output)
+
 
 
 
