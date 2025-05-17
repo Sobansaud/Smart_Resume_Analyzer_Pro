@@ -861,18 +861,31 @@ def render_pdf_from_data(context):
 
     
     # Education / Experience / Projects
-    for section_title, items in [
-        ("Education", context.get("education", [])),
-        ("Experience", context.get("experience", [])),
-        ("Projects", context.get("projects", [])),
-    ]:
-        if items:
+    for section in ["education", "experience", "projects"]:
+        section_data = context.get(section, "")
+        if section_data:
+            pdf.ln(10)
             pdf.set_font('DejaVu', '', 14)
-            pdf.cell(0, 10, f"{section_title}:", ln=True)
+            pdf.cell(0, 10, f"{section.capitalize()}:", ln=True)
             pdf.set_font('DejaVu', '', 12)
-            for item in items:
-                pdf.multi_cell(epw, 8, f"• {clean_text(item)}")
-            pdf.ln(5)
+            for item in section_data:
+                pdf.cell(0, 10, txt=f"{item['title']} - {item['location']}", ln=True)
+                pdf.cell(0, 10, txt=f"{item['description']}", ln=True)
+                pdf.ln(5)
+
+                                                              
+    # for section_title, items in [
+    #     ("Education", context.get("education", [])),
+    #     ("Experience", context.get("experience", [])),
+    #     ("Projects", context.get("projects", [])),
+    # ]:
+    #     if items:
+    #         pdf.set_font('DejaVu', '', 14)
+    #         pdf.cell(0, 10, f"{section_title}:", ln=True)
+    #         pdf.set_font('DejaVu', '', 12)
+    #         for item in items:
+    #             pdf.multi_cell(epw, 8, f"• {clean_text(item)}")
+    #         pdf.ln(5)
 
     # Interests
     interests = ", ".join(context.get("interests", []))
