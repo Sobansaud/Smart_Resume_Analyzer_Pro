@@ -878,6 +878,121 @@ load_dotenv()
 #     return BytesIO(pdf_output)
 
 
+# from fpdf import FPDF
+# from io import BytesIO
+# import os
+# import base64
+# import unicodedata
+# from PIL import Image
+# from tempfile import NamedTemporaryFile
+
+
+# def clean_text(text):
+#     try:
+#         if isinstance(text, list):
+#             return "\n".join(map(lambda s: "• " + str(s).strip(), text))
+#         return unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode("ascii")
+#     except Exception:
+#         return str(text) or ""
+
+
+# def render_pdf_from_data(context):
+#     pdf = FPDF()
+#     pdf.set_auto_page_break(False)  # Manual control
+#     pdf.add_page()
+
+#     epw = pdf.w - 2 * pdf.l_margin
+#     col_width = epw / 2 - 5
+
+#     # Font
+#     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
+#     if not os.path.isfile(font_path):
+#         raise FileNotFoundError(f"Font file not found: {font_path}")
+#     pdf.add_font('DejaVu', '', font_path, uni=True)
+#     pdf.set_font('DejaVu', '', 12)
+
+#     # === Image ===
+#     image_url = context.get("profile_image_url", "")
+#     if image_url.startswith("data:image"):
+#         try:
+#             header, encoded = image_url.split(",", 1)
+#             img_bytes = base64.b64decode(encoded)
+#             img = Image.open(BytesIO(img_bytes))
+#             with NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+#                 img.save(tmpfile.name)
+#                 pdf.image(tmpfile.name, x=pdf.w / 2 - 20, y=10, w=40, h=40)
+#                 os.unlink(tmpfile.name)
+#         except:
+#             pass
+#     pdf.ln(45)
+
+#     # === Name and Email ===
+#     pdf.set_font('DejaVu', '', 20)
+#     pdf.cell(0, 10, clean_text(context.get("name", "John Doe")), ln=True, align="C")
+#     pdf.set_font('DejaVu', '', 12)
+#     pdf.cell(0, 8, f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
+#     pdf.ln(6)
+
+#     # === Column Separation Line ===
+#     top_y = pdf.get_y()
+#     bottom_y = 280
+#     pdf.set_draw_color(180, 180, 180)
+#     pdf.set_line_width(0.3)
+#     pdf.line(pdf.l_margin + epw / 2, top_y, pdf.l_margin + epw / 2, bottom_y)
+
+#     # === Data ===
+#     left_sections = [
+#         ("About Me", context.get("about_me", ""), False),
+#         ("Education", context.get("education", "").split("\n"), True),
+#         ("Interests", context.get("interests", "").split("\n"), True),
+#         ("Social Links", [
+#             f"{p.capitalize()}: {context.get(p)}"
+#             for p in ["linkedin", "github", "twitter"] if context.get(p)
+#         ], True),
+#     ]
+
+#     right_sections = [
+#         ("Experience", context.get("experience", "").split("\n"), True),
+#         ("Projects", context.get("projects", []), True),
+#         ("Skills", context.get("skills", "").split("\n"), True),
+
+#     ]
+
+#     y_left = pdf.get_y()
+#     y_right = y_left
+#     x_left = pdf.l_margin
+#     x_right = pdf.l_margin + epw / 2 + 5
+
+#     def draw_section(x, y, title, content, is_list):
+#         pdf.set_xy(x, y)
+#         pdf.set_font('DejaVu', '', 14)
+#         pdf.cell(col_width, 8, f"{title}:", ln=True)
+#         pdf.set_font('DejaVu', '', 11)
+#         start_y = pdf.get_y()
+#         pdf.set_x(x)
+
+#         if is_list and isinstance(content, list):
+#             for item in content:
+#                 pdf.set_x(x)
+#                 pdf.multi_cell(col_width, 6, f"• {clean_text(item)}")
+#         else:
+#             pdf.multi_cell(col_width, 6, clean_text(content))
+
+#         return pdf.get_y() + 2
+
+#     # Left column
+#     for title, content, is_list in left_sections:
+#         y_left = draw_section(x_left, y_left, title, content, is_list)
+
+#     # Right column
+#     for title, content, is_list in right_sections:
+#         y_right = draw_section(x_right, y_right, title, content, is_list)
+
+#     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
+#     return BytesIO(pdf_output)
+
+
+
 from fpdf import FPDF
 from io import BytesIO
 import os
@@ -885,7 +1000,6 @@ import base64
 import unicodedata
 from PIL import Image
 from tempfile import NamedTemporaryFile
-
 
 def clean_text(text):
     try:
@@ -895,14 +1009,19 @@ def clean_text(text):
     except Exception:
         return str(text) or ""
 
+class CustomPDF(FPDF):
+    def __init__(self):
+        # A4 width=210mm, height=297mm; height increased to 320 to allow bigger page
+        super().__init__(format=(210, 320))
+        self.set_auto_page_break(False)
 
 def render_pdf_from_data(context):
-    pdf = FPDF()
-    pdf.set_auto_page_break(False)  # Manual control
+    pdf = CustomPDF()
     pdf.add_page()
 
     epw = pdf.w - 2 * pdf.l_margin
     col_width = epw / 2 - 5
+    margin_top = 10
 
     # Font
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
@@ -920,11 +1039,11 @@ def render_pdf_from_data(context):
             img = Image.open(BytesIO(img_bytes))
             with NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
                 img.save(tmpfile.name)
-                pdf.image(tmpfile.name, x=pdf.w / 2 - 20, y=10, w=40, h=40)
+                pdf.image(tmpfile.name, x=pdf.w / 2 - 20, y=margin_top, w=40, h=40)
                 os.unlink(tmpfile.name)
         except:
             pass
-    pdf.ln(45)
+    pdf.set_y(margin_top + 45)
 
     # === Name and Email ===
     pdf.set_font('DejaVu', '', 20)
@@ -935,12 +1054,11 @@ def render_pdf_from_data(context):
 
     # === Column Separation Line ===
     top_y = pdf.get_y()
-    bottom_y = 280
+    bottom_y = pdf.h - pdf.b_margin
     pdf.set_draw_color(180, 180, 180)
     pdf.set_line_width(0.3)
     pdf.line(pdf.l_margin + epw / 2, top_y, pdf.l_margin + epw / 2, bottom_y)
 
-    # === Data ===
     left_sections = [
         ("About Me", context.get("about_me", ""), False),
         ("Education", context.get("education", "").split("\n"), True),
@@ -955,7 +1073,6 @@ def render_pdf_from_data(context):
         ("Experience", context.get("experience", "").split("\n"), True),
         ("Projects", context.get("projects", []), True),
         ("Skills", context.get("skills", "").split("\n"), True),
-
     ]
 
     y_left = pdf.get_y()
@@ -963,12 +1080,35 @@ def render_pdf_from_data(context):
     x_left = pdf.l_margin
     x_right = pdf.l_margin + epw / 2 + 5
 
+    def ensure_space(y, height_needed):
+        """If not enough space for height_needed at y, add new page and reset y"""
+        if y + height_needed > bottom_y:
+            pdf.add_page()
+            # redraw vertical line on new page
+            top_new = pdf.get_y()
+            pdf.set_draw_color(180, 180, 180)
+            pdf.set_line_width(0.3)
+            pdf.line(pdf.l_margin + epw / 2, top_new, pdf.l_margin + epw / 2, bottom_y)
+            return pdf.get_y()
+        else:
+            return y
+
     def draw_section(x, y, title, content, is_list):
+        # Estimate height needed roughly:
+        # title line ~8, each list item ~6, for non-list estimate based on length
+        lines = 1
+        if is_list and isinstance(content, list):
+            lines += len(content)
+        else:
+            lines += max(1, len(str(content)) // 40)  # approx chars per line
+
+        height_needed = 8 + lines * 6 + 2
+        y = ensure_space(y, height_needed)
+
         pdf.set_xy(x, y)
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(col_width, 8, f"{title}:", ln=True)
         pdf.set_font('DejaVu', '', 11)
-        start_y = pdf.get_y()
         pdf.set_x(x)
 
         if is_list and isinstance(content, list):
