@@ -543,16 +543,19 @@ load_dotenv()
     
 #     return output_filename
 
-
 def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
 
-    font_path = os.path.join(os.path.dirname(__file__),'DejaVuSans.ttf')
+    # Font file path
+    font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
+    if not os.path.isfile(font_path):
+        raise FileNotFoundError(f"Font file not found: {font_path}")
 
-    # Add the font once with empty style:
+    # Add font once
     pdf.add_font('DejaVu', '', font_path, uni=True)
     pdf.set_font('DejaVu', '', 20)
+
     pdf.cell(0, 15, txt=context.get("name", "Name"), ln=True, align="C")
 
     pdf.set_font('DejaVu', '', 12)
@@ -565,7 +568,7 @@ def render_pdf_from_data(context):
     pdf.multi_cell(0, 8, context.get("about_me", ""))
     pdf.ln(5)
 
-    # Continue with other fields similarly, using the same font and style:
+    # Skills
     skills = ", ".join(context.get("skills", []))
     if skills:
         pdf.set_font('DejaVu', '', 14)
@@ -627,98 +630,11 @@ def render_pdf_from_data(context):
     if twitter:
         pdf.cell(0, 8, f"Twitter: {twitter}", ln=True)
 
+    # Output PDF to BytesIO buffer
     pdf_output = BytesIO()
     pdf.output(pdf_output)
     pdf_output.seek(0)
     return pdf_output
-
-    # # Load Unicode font (font file should be in the same folder or specify full path)
-    # pdf.add_font('DejaVu', '', 'DejaVuSans.ttf', uni=True)
-    # pdf.set_font("DejaVu", "", 20)
-    # pdf.cell(0, 12, txt=context.get("name", "Name"), ln=True, align="C")
-
-    # pdf.set_font("DejaVu", "", 12)
-    # pdf.cell(0, 10, f"Email: {context.get('email', '')}", ln=True, align="C")
-    # pdf.ln(5)
-
-    # # About Me
-    # pdf.set_font("DejaVu", "", 14)
-    # pdf.cell(0, 10, "About Me:", ln=True)
-    # pdf.set_font("DejaVu", "", 12)
-    # pdf.multi_cell(0, 6, context.get("about_me", ""))
-    # pdf.ln(5)
-
-    # # Skills (simple plain text, multiline or comma separated)
-    # skills = context.get("skills", "")
-    # if isinstance(skills, list):
-    #     skills = ", ".join(skills)
-    # pdf.set_font("DejaVu", "", 14)
-    # pdf.cell(0, 10, "Skills:", ln=True)
-    # pdf.set_font("DejaVu", "", 12)
-    # pdf.multi_cell(0, 6, skills)
-    # pdf.ln(5)
-
-    # # Education (multiline text)
-    # education = context.get("education", "")
-    # if isinstance(education, list):
-    #     education = "\n".join(education)
-    # pdf.set_font("DejaVu", "", 14)
-    # pdf.cell(0, 10, "Education:", ln=True)
-    # pdf.set_font("DejaVu", "", 12)
-    # pdf.multi_cell(0, 6, education)
-    # pdf.ln(5)
-
-    # # Experience
-    # experience = context.get("experience", "")
-    # if isinstance(experience, list):
-    #     experience = "\n".join(experience)
-    # pdf.set_font("DejaVu", "", 14)
-    # pdf.cell(0, 10, "Experience:", ln=True)
-    # pdf.set_font("DejaVu", "", 12)
-    # pdf.multi_cell(0, 6, experience)
-    # pdf.ln(5)
-
-    # # Projects
-    # projects = context.get("projects", "")
-    # if isinstance(projects, list):
-    #     projects = "\n".join(projects)
-    # pdf.set_font("DejaVu", "", 14)
-    # pdf.cell(0, 10, "Projects:", ln=True)
-    # pdf.set_font("DejaVu", "", 12)
-    # pdf.multi_cell(0, 6, projects)
-    # pdf.ln(5)
-
-    # # Interests
-    # interests = context.get("interests", "")
-    # if isinstance(interests, list):
-    #     interests = ", ".join(interests)
-    # pdf.set_font("DejaVu", "", 14)
-    # pdf.cell(0, 10, "Interests:", ln=True)
-    # pdf.set_font("DejaVu", "", 12)
-    # pdf.multi_cell(0, 6, interests)
-    # pdf.ln(5)
-
-    # # Social Links
-    # pdf.set_font("DejaVu", "", 14)
-    # pdf.cell(0, 10, "Social Links:", ln=True)
-    # pdf.set_font("DejaVu", "", 12)
-    # linkedin = context.get("linkedin", "")
-    # github = context.get("github", "")
-    # twitter = context.get("twitter", "")
-    # if linkedin:
-    #     pdf.cell(0, 6, f"LinkedIn: {linkedin}", ln=True)
-    # if github:
-    #     pdf.cell(0, 6, f"GitHub: {github}", ln=True)
-    # if twitter:
-    #     pdf.cell(0, 6, f"Twitter: {twitter}", ln=True)
-
-    # # Output PDF as BytesIO stream (you can save or return it)
-    # pdf_output = BytesIO()
-    # pdf.output(pdf_output)
-    # pdf_output.seek(0)
-    # return pdf_output
-
-
 
 
 def get_pdf_download_link(pdf_file):
