@@ -770,126 +770,123 @@ load_dotenv()
 
 #     # Output as BytesIO
 #     return BytesIO(pdf.output(dest='S').encode('latin1', 'ignore'))
+
+
 from fpdf import FPDF
-import os
 from io import BytesIO
+import os
+import base64
 import unicodedata
+from PIL import Image
+from tempfile import NamedTemporaryFile
+
 
 def clean_text(text):
     try:
         if isinstance(text, list):
-            return "\n".join(map(lambda s: "- " + str(s).strip(), text))
+            return "\n".join(map(lambda s: "• " + str(s).strip(), text))
         return unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode("ascii")
     except Exception:
         return str(text) or ""
+
 
 def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
     epw = pdf.w - 2 * pdf.l_margin
+    col_width = epw / 2 - 5
 
     # Font setup
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
     pdf.add_font('DejaVu', '', font_path, uni=True)
+
     pdf.set_font('DejaVu', '', 12)
 
-    # Profile Picture (optional)
-    image_file = context.get("profile_image")
-    if image_file:
+    # === Profile Image ===
+    image_url = context.get("profile_image_url", "")
+    if image_url.startswith("data:image"):
         try:
-            temp_img_path = "temp_profile.jpg"
-            with open(temp_img_path, "wb") as f:
-                f.write(image_file.read())
-            pdf.image(temp_img_path, x=85, y=pdf.get_y(), w=40, h=40)
-            os.remove(temp_img_path)
+            header, encoded = image_url.split(",", 1)
+            img_bytes = base64.b64decode(encoded)
+            img = Image.open(BytesIO(img_bytes))
+
+            with NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+                img.save(tmpfile.name)
+                pdf.image(tmpfile.name, x=pdf.w / 2 - 20, y=10, w=40, h=40)
+                os.unlink(tmpfile.name)
             pdf.ln(45)
         except Exception as e:
-            print("Image error:", e)
+            print("Error adding image:", e)
             pdf.ln(10)
     else:
         pdf.ln(10)
 
-    # Name & Email (centered)
+    # === Name and Email Centered ===
     pdf.set_font('DejaVu', '', 20)
-    pdf.cell(0, 10, txt=clean_text(context.get("name", "John Doe")), ln=True, align="C")
+    pdf.cell(0, 10, clean_text(context.get("name", "John Doe")), ln=True, align="C")
+
     pdf.set_font('DejaVu', '', 12)
-    pdf.cell(0, 8, txt=f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
-    pdf.ln(6)
+    pdf.cell(0, 8, f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
+    pdf.ln(8)
 
-    # Draw center line to simulate column separation
-    center_x = pdf.w / 2
-    pdf.set_draw_color(180, 180, 180)
-    pdf.line(center_x, pdf.get_y(), center_x, 270)
+    # === Divider Line ===
+    line_y = pdf.get_y()
+    pdf.set_draw_color(150, 150, 150)
+    pdf.set_line_width(0.3)
+    pdf.line(pdf.l_margin + epw / 2, line_y, pdf.l_margin + epw / 2, 280)  # Vertical line
 
-    # Function to add section in two-column layout
+    # === Two-Column Section Helper ===
     def add_section(title, content, is_list=False, left=True):
-    col_width = epw / 2 - 5
-    x = pdf.l_margin if left else pdf.l_margin + epw / 2 + 5
-    y = pdf.get_y()
+        x = pdf.l_margin if left else pdf.l_margin + epw / 2 + 5
+        y = pdf.get_y()
+        pdf.set_xy(x, y)
+        pdf.set_font('DejaVu', '', 14)
+        pdf.cell(col_width, 8, f"{title}:", ln=True)
+        pdf.set_font('DejaVu', '', 11)
+        pdf.set_x(x)
+        if is_list and isinstance(content, list):
+            for item in content:
+                pdf.multi_cell(col_width, 6, f"• {clean_text(item)}")
+                pdf.set_x(x)
+        else:
+            pdf.multi_cell(col_width, 6, clean_text(content))
+        pdf.ln(2)
 
-    pdf.set_xy(x, y)
-    pdf.set_font('DejaVu', '', 14)
-    pdf.cell(col_width, 10, f"{title}:", ln=True)
-    pdf.set_font('DejaVu', '', 11)
-    pdf.set_x(x)
+    # === Split Sections ===
+    # Left Column
+    add_section("About Me", context.get("about_me", ""), left=True)
+    add_section("Skills", context.get("skills", "").split("\n"), is_list=True, left=True)
+    add_section("Education", context.get("education", "").split("\n"), is_list=True, left=True)
+    add_section("Projects", context.get("projects", []), is_list=True, left=True)
 
-    if is_list and isinstance(content, list):
-        for item in content:
-            pdf.multi_cell(col_width, 6, f"• {clean_text(item)}")
-            pdf.set_x(x)
-    else:
-        pdf.multi_cell(col_width, 6, clean_text(content))  # 🔥 FIXED LINE — removed ln=1
+    # Right Column
+    add_section("Experience", context.get("experience", "").split("\n"), is_list=True, left=False)
+    add_section("Interests", context.get("interests", "").split("\n"), is_list=True, left=False)
 
-    pdf.ln(3)
-
-
-    # Two-column layout
-    left_data = [
-        ("About Me", context.get("about_me"), False),
-        ("Education", context.get("education", []), True),
-        ("Projects", context.get("projects", []), True),
-    ]
-    right_data = [
-        ("Skills", context.get("skills", []), True),
-        ("Experience", context.get("experience", []), True),
-        ("Interests", context.get("interests", []), True),
-    ]
-
-    y_start = pdf.get_y()
-    pdf.set_y(y_start)
-    for idx, (title, content, is_list) in enumerate(left_data):
-        pdf.set_y(y_start + idx * 35)
-        add_section(title, content, is_list, left=True)
-
-    pdf.set_y(y_start)
-    for idx, (title, content, is_list) in enumerate(right_data):
-        pdf.set_y(y_start + idx * 35)
-        add_section(title, content, is_list, left=False)
-
-    # Social Links (full width)
+    # Social Links
     links = []
     for platform in ["linkedin", "github", "twitter"]:
         link = context.get(platform)
         if link:
             links.append(f"{platform.capitalize()}: {link}")
-    if links:
-        pdf.ln(8)
-        pdf.set_font('DejaVu', '', 13)
-        pdf.cell(0, 10, "Social Links:", ln=True)
-        pdf.set_font('DejaVu', '', 11)
-        for link in links:
-            pdf.cell(0, 8, f"- {clean_text(link)}", ln=True)
+    add_section("Social Links", links, is_list=True, left=False)
 
+    # Output as PDF in memory
     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
     return BytesIO(pdf_output)
+
+
+
 
 def get_pdf_download_link(pdf_file):
     with open(pdf_file, "rb") as f:
         base64_pdf = base64.b64encode(f.read()).decode("utf-8")
     href = f'<a href="data:application/pdf;base64,{base64_pdf}" download="{pdf_file}">📥 Download Your Styled CV as PDF</a>'
     return href
+
+
 
 
 USERS_FILE = "data/users.csv"
