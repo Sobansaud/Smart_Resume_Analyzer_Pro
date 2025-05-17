@@ -407,9 +407,9 @@ from collections import Counter
 # from jinja2 import Environment, FileSystemLoader
 import jinja2
 # from xhtml2pdf import pisa
-# from weasyprint import HTML, CSS
-import pdfkit
-import platform
+from weasyprint import HTML
+# import pdfkit
+# import platform
 import stripe
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
@@ -463,45 +463,44 @@ load_dotenv()
 #     return output_filename
 
 
-def render_pdf_from_template(template_path, context, output_filename):
-    # Render HTML with Jinja2
-    template_loader = jinja2.FileSystemLoader(searchpath="./templates")
-    env = jinja2.Environment(loader=template_loader)
-    template = env.get_template(template_path)
-    html_content = template.render(context)
+# def render_pdf_from_template(template_path, context, output_filename):
+#     # Render HTML with Jinja2
+#     template_loader = jinja2.FileSystemLoader(searchpath="./templates")
+#     env = jinja2.Environment(loader=template_loader)
+#     template = env.get_template(template_path)
+#     html_content = template.render(context)
 
-    # Save temporary HTML file
-    temp_html_file = "temp_cv.html"
-    with open(temp_html_file, "w", encoding="utf-8") as f:
-        f.write(html_content)
+#     # Save temporary HTML file
+#     temp_html_file = "temp_cv.html"
+#     with open(temp_html_file, "w", encoding="utf-8") as f:
+#         f.write(html_content)
 
-    # Detect OS and configure wkhtmltopdf path accordingly
-    if platform.system() == "Windows":
-        # Windows path (update if your wkhtmltopdf installed location is different)
-        wkhtmltopdf_path = r"C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe"
-        config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
-    else:
-        # For Linux / Mac assume wkhtmltopdf is in PATH
-        config = pdfkit.configuration()
+#     # Detect OS and configure wkhtmltopdf path accordingly
+#     if platform.system() == "Windows":
+#         # Windows path (update if your wkhtmltopdf installed location is different)
+#         wkhtmltopdf_path = r"C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe"
+#         config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+#     else:
+#         # For Linux / Mac assume wkhtmltopdf is in PATH
+#         config = pdfkit.configuration()
 
-    # PDF options
-    options = {
-        'enable-local-file-access': None,  # use None or "" both okay
-        'quiet': '',
-        'encoding': "UTF-8",
-        'page-size': 'A4',
-        'margin-top': '0mm',
-        'margin-right': '0mm',
-        'margin-bottom': '0mm',
-        'margin-left': '0mm',
-        'zoom': '0.9',
-    }
+#     # PDF options
+#     options = {
+#         'enable-local-file-access': None,  # use None or "" both okay
+#         'quiet': '',
+#         'encoding': "UTF-8",
+#         'page-size': 'A4',
+#         'margin-top': '0mm',
+#         'margin-right': '0mm',
+#         'margin-bottom': '0mm',
+#         'margin-left': '0mm',
+#         'zoom': '0.9',
+#     }
 
-    # Generate PDF
-    pdfkit.from_file(temp_html_file, output_filename, options=options, configuration=config)
+#     # Generate PDF
+#     pdfkit.from_file(temp_html_file, output_filename, options=options, configuration=config)
 
-    return output_filename
-
+#     return output_filename
 
 # def render_pdf_from_template(template_path, context, output_filename):
 #     # Step 1: Load Jinja2 Template
@@ -515,6 +514,18 @@ def render_pdf_from_template(template_path, context, output_filename):
 
 #     return output_filename
 
+
+def render_pdf_from_template(template_path, context, output_filename):
+    # Render HTML with Jinja2
+    template_loader = jinja2.FileSystemLoader(searchpath="./templates")
+    env = jinja2.Environment(loader=template_loader)
+    template = env.get_template(template_path)
+    html_content = template.render(context)
+
+    # Generate PDF using WeasyPrint
+    HTML(string=html_content).write_pdf(output_filename)
+
+    return output_filename
 
 def get_pdf_download_link(pdf_file):
     with open(pdf_file, "rb") as f:
