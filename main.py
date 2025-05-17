@@ -736,6 +736,80 @@ load_dotenv()
 
 
 
+# from fpdf import FPDF
+# from io import BytesIO
+# import unicodedata
+# import os
+
+# def clean_text(text):
+#     try:
+#         return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+#     except:
+#         return text or ""
+
+# def render_pdf_from_data(context):
+#     pdf = FPDF()
+#     pdf.add_page()
+
+#     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
+#     if not os.path.isfile(font_path):
+#         raise FileNotFoundError(f"Font file not found: {font_path}")
+
+#     pdf.add_font('DejaVu', '', font_path, uni=True)
+#     pdf.set_font('DejaVu', '', 20)
+#     pdf.cell(0, 15, txt=clean_text(context.get("name", "Name")), ln=True, align="C")
+
+#     pdf.set_font('DejaVu', '', 12)
+#     pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', ''))}", ln=True, align="C")
+#     pdf.ln(5)
+
+#     pdf.set_font('DejaVu', '', 14)
+#     pdf.cell(0, 10, "About Me:", ln=True)
+#     pdf.set_font('DejaVu', '', 12)
+#     pdf.multi_cell(0, 8, clean_text(context.get("about_me", "")))
+#     pdf.ln(5)
+
+#     skills = ", ".join(context.get("skills", []))
+#     if skills:
+#         pdf.set_font('DejaVu', '', 14)
+#         pdf.cell(0, 10, "Skills:", ln=True)
+#         pdf.set_font('DejaVu', '', 12)
+#         pdf.multi_cell(0, 8, clean_text(skills))
+#         pdf.ln(5)
+
+#     for section_title, items in [
+#         ("Education", context.get("education", [])),
+#         ("Experience", context.get("experience", [])),
+#         ("Projects", context.get("projects", [])),
+#     ]:
+#         if items:
+#             pdf.set_font('DejaVu', '', 14)
+#             pdf.cell(0, 10, f"{section_title}:", ln=True)
+#             pdf.set_font('DejaVu', '', 12)
+#             for item in items:
+#                 pdf.multi_cell(0, 8, f"- {clean_text(item)}")
+#             pdf.ln(5)
+
+#     interests = ", ".join(context.get("interests", []))
+#     if interests:
+#         pdf.set_font('DejaVu', '', 14)
+#         pdf.cell(0, 10, "Interests:", ln=True)
+#         pdf.set_font('DejaVu', '', 12)
+#         pdf.multi_cell(0, 8, clean_text(interests))
+#         pdf.ln(5)
+
+#     pdf.set_font('DejaVu', '', 14)
+#     pdf.cell(0, 10, "Social Links:", ln=True)
+#     pdf.set_font('DejaVu', '', 12)
+#     for platform in ["linkedin", "github", "twitter"]:
+#         link = context.get(platform, "")
+#         if link:
+#             pdf.multi_cell(0, 8, f"{platform.capitalize()}: {clean_text(link)}")
+
+#     # ✅ THIS PART FIXES THE ERROR:
+#     pdf_output = pdf.output(dest='S').encode('latin1')  # Or .encode('utf-8') if you know your chars are safe
+#     return BytesIO(pdf_output)
+
 from fpdf import FPDF
 from io import BytesIO
 import unicodedata
@@ -756,27 +830,33 @@ def render_pdf_from_data(context):
         raise FileNotFoundError(f"Font file not found: {font_path}")
 
     pdf.add_font('DejaVu', '', font_path, uni=True)
+    
     pdf.set_font('DejaVu', '', 20)
     pdf.cell(0, 15, txt=clean_text(context.get("name", "Name")), ln=True, align="C")
 
     pdf.set_font('DejaVu', '', 12)
     pdf.cell(0, 10, txt=f"Email: {clean_text(context.get('email', ''))}", ln=True, align="C")
-    pdf.ln(5)
+    pdf.ln(10)
 
-    pdf.set_font('DejaVu', '', 14)
-    pdf.cell(0, 10, "About Me:", ln=True)
-    pdf.set_font('DejaVu', '', 12)
-    pdf.multi_cell(0, 8, clean_text(context.get("about_me", "")))
-    pdf.ln(5)
+    # About Me
+    about = clean_text(context.get("about_me", ""))
+    if about:
+        pdf.set_font('DejaVu', '', 14)
+        pdf.cell(0, 10, "About Me:", ln=True)
+        pdf.set_font('DejaVu', '', 12)
+        pdf.multi_cell(pdf.epw, 8, about)
+        pdf.ln(5)
 
+    # Skills
     skills = ", ".join(context.get("skills", []))
     if skills:
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(0, 10, "Skills:", ln=True)
         pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(0, 8, clean_text(skills))
+        pdf.multi_cell(pdf.epw, 8, clean_text(skills))
         pdf.ln(5)
 
+    # Education / Experience / Projects
     for section_title, items in [
         ("Education", context.get("education", [])),
         ("Experience", context.get("experience", [])),
@@ -787,28 +867,31 @@ def render_pdf_from_data(context):
             pdf.cell(0, 10, f"{section_title}:", ln=True)
             pdf.set_font('DejaVu', '', 12)
             for item in items:
-                pdf.multi_cell(0, 8, f"- {clean_text(item)}")
+                pdf.multi_cell(pdf.epw, 8, f"• {clean_text(item)}")
             pdf.ln(5)
 
+    # Interests
     interests = ", ".join(context.get("interests", []))
     if interests:
         pdf.set_font('DejaVu', '', 14)
         pdf.cell(0, 10, "Interests:", ln=True)
         pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(0, 8, clean_text(interests))
+        pdf.multi_cell(pdf.epw, 8, clean_text(interests))
         pdf.ln(5)
 
+    # Social Links
     pdf.set_font('DejaVu', '', 14)
     pdf.cell(0, 10, "Social Links:", ln=True)
     pdf.set_font('DejaVu', '', 12)
     for platform in ["linkedin", "github", "twitter"]:
         link = context.get(platform, "")
         if link:
-            pdf.multi_cell(0, 8, f"{platform.capitalize()}: {clean_text(link)}")
+            pdf.multi_cell(pdf.epw, 8, f"{platform.capitalize()}: {clean_text(link)}")
 
-    # ✅ THIS PART FIXES THE ERROR:
-    pdf_output = pdf.output(dest='S').encode('latin1')  # Or .encode('utf-8') if you know your chars are safe
+    # Generate PDF in memory
+    pdf_output = pdf.output(dest='S').encode('latin1')
     return BytesIO(pdf_output)
+
 
 
 
