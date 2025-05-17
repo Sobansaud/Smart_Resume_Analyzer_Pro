@@ -943,18 +943,19 @@ def render_pdf_from_data(context):
     # === Data ===
     left_sections = [
         ("About Me", context.get("about_me", ""), False),
-        ("Skills", context.get("skills", "").split("\n"), True),
         ("Education", context.get("education", "").split("\n"), True),
-        ("Projects", context.get("projects", []), True),
-    ]
-
-    right_sections = [
-        ("Experience", context.get("experience", "").split("\n"), True),
         ("Interests", context.get("interests", "").split("\n"), True),
         ("Social Links", [
             f"{p.capitalize()}: {context.get(p)}"
             for p in ["linkedin", "github", "twitter"] if context.get(p)
         ], True),
+    ]
+
+    right_sections = [
+        ("Experience", context.get("experience", "").split("\n"), True),
+        ("Projects", context.get("projects", []), True),
+        ("Skills", context.get("skills", "").split("\n"), True),
+
     ]
 
     y_left = pdf.get_y()
