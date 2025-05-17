@@ -404,9 +404,10 @@ import os
 import time
 import pandas as pd
 from collections import Counter
-# from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 import jinja2
 # from xhtml2pdf import pisa
+from weasyprint import HTML, CSS
 import pdfkit
 import stripe
 from wordcloud import WordCloud
@@ -444,7 +445,7 @@ def render_pdf_from_template(template_path, context, output_filename):
 
     # PDF options
     options = {
-        'enable-local-file-access': None,
+        'enable-local-file-access': " ",
         'quiet': '',
         'encoding': "UTF-8",
         'page-size': 'A4',
@@ -459,6 +460,19 @@ def render_pdf_from_template(template_path, context, output_filename):
     # Generate PDF
     pdfkit.from_file(temp_html_file, output_filename, options=options, configuration=config)
     return output_filename
+
+# def render_pdf_from_template(template_path, context, output_filename):
+#     # Step 1: Load Jinja2 Template
+#     template_loader = jinja2.FileSystemLoader(searchpath="./templates")
+#     env = jinja2.Environment(loader=template_loader)
+#     template = env.get_template(template_path)
+#     html_content = template.render(context)
+
+#     # Step 2: Render PDF using WeasyPrint
+#     HTML(string=html_content, base_url=".").write_pdf(output_filename)
+
+#     return output_filename
+
 
 def get_pdf_download_link(pdf_file):
     with open(pdf_file, "rb") as f:
