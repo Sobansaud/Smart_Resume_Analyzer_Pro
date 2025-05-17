@@ -548,7 +548,7 @@ def render_pdf_from_data(context):
     pdf = FPDF()
     pdf.add_page()
 
-    font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'DejaVuSans.ttf')
+    font_path = os.path.join(os.path.dirname(__file__),'DejaVuSans.ttf')
 
     # Add the font once with empty style:
     pdf.add_font('DejaVu', '', font_path, uni=True)
