@@ -989,7 +989,6 @@ load_dotenv()
 
 #     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
 #     return BytesIO(pdf_output)
-
 from fpdf import FPDF
 from io import BytesIO
 import os
@@ -1006,15 +1005,32 @@ def clean_text(text):
     except Exception:
         return str(text) or ""
 
+class PDF(FPDF):
+    def multi_cell_height(self, w, h, txt):
+        # Approximate height of multi_cell for given text
+        # Counting number of lines it will take
+        # This is an estimate since FPDF doesn't provide it directly
+        nb = txt.count('\n') + 1
+        # Further split lines that exceed width
+        cw = self.get_string_width('A')  # average char width approx
+        max_chars_per_line = int(w / cw)
+        total_lines = 0
+        for line in txt.split('\n'):
+            length = len(line)
+            lines = length // max_chars_per_line + 1
+            total_lines += lines
+        return total_lines * h
+
 def render_pdf_from_data(context):
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf = PDF()
+    pdf.set_auto_page_break(auto=False)  # We manage page breaks ourselves
     pdf.add_page()
 
     epw = pdf.w - 2 * pdf.l_margin
     col_width = epw / 2 - 5
+    page_height = pdf.h - pdf.t_margin - pdf.b_margin
 
-    # Font
+    # Font loading
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
@@ -1046,14 +1062,14 @@ def render_pdf_from_data(context):
     pdf.cell(0, 8, f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
     pdf.ln(8)
 
-    # Vertical Line
+    # Vertical Line separator
     top_y = pdf.get_y()
-    bottom_y = 285
+    bottom_y = pdf.h - pdf.b_margin
     pdf.set_draw_color(200, 200, 200)
     pdf.set_line_width(0.4)
     pdf.line(pdf.l_margin + epw / 2, top_y, pdf.l_margin + epw / 2, bottom_y)
 
-    # Section Content
+    # Sections data
     left_sections = [
         ("About Me", context.get("about_me", ""), False),
         ("Skills", context.get("skills", "").split("\n"), True),
@@ -1070,12 +1086,23 @@ def render_pdf_from_data(context):
         ], True),
     ]
 
-    y_left = pdf.get_y()
-    y_right = y_left
     x_left = pdf.l_margin
     x_right = pdf.l_margin + epw / 2 + 5
 
-    # Draw section function with better spacing & page break support
+    y_start = pdf.get_y()
+
+    # Function to draw header and content, returns height used
+    def draw_section_estimate_height(title, content, is_list):
+        # header height approx 9 + 2 for line + 5 padding = 16
+        base_height = 16
+        pdf.set_font('DejaVu', '', 11)
+        if is_list and isinstance(content, list):
+            total_text = "\n".join([f"• {clean_text(i)}" for i in content])
+        else:
+            total_text = clean_text(content)
+        text_height = pdf.multi_cell_height(col_width, 6, total_text)
+        return base_height + text_height
+
     def draw_section(x, y, title, content, is_list):
         pdf.set_xy(x, y)
         pdf.set_font('DejaVu', '', 15)
@@ -1099,14 +1126,54 @@ def render_pdf_from_data(context):
 
         return pdf.get_y() + 5
 
-    # Render sections
+    # Calculate total height of left and right sections separately
+    left_height = 0
+    for title, content, is_list in left_sections:
+        left_height += draw_section_estimate_height(title, content, is_list)
+
+    right_height = 0
+    for title, content, is_list in right_sections:
+        right_height += draw_section_estimate_height(title, content, is_list)
+
+    max_height = max(left_height, right_height)
+
+    # Check if max_height fits in the current page height available
+    current_y = pdf.get_y()
+    available_height = page_height - (current_y - pdf.t_margin)
+
+    # If doesn't fit, add page break before drawing columns
+    if max_height > available_height:
+        pdf.add_page()
+
+    # Draw left column
+    y_left = pdf.get_y()
     for title, content, is_list in left_sections:
         y_left = draw_section(x_left, y_left, title, content, is_list)
 
+    # Draw right column
+    y_right = pdf.get_y()
+    # Start right column at same y as left column start (important)
+    y_right = pdf.get_y() - left_height + (y_left - pdf.get_y())  # Align top lines of left and right col
+
+    # To ensure right column always starts at the top of left column:
+    y_right = pdf.get_y() - (y_left - pdf.get_y())
+
+    # But simpler is:
+    y_right = pdf.get_y() - left_height + left_height - max_height  # Actually this needs care, so:
+    y_right = pdf.get_y() - max_height  # Start right at the same top as left
+
+    y_right = pdf.get_y() - max_height
+    # Actually better to reset to the y after page break or new page, so let's set y_right to same as y_left start
+    y_right = pdf.get_y() if max_height <= available_height else pdf.t_margin + 10
+
+    # So final better approach:
+    y_right = pdf.get_y() if max_height <= available_height else pdf.t_margin + 10
+
+    # Draw right sections normally (side by side)
+    y_right = pdf.get_y() if max_height <= available_height else pdf.t_margin + 10
     for title, content, is_list in right_sections:
         y_right = draw_section(x_right, y_right, title, content, is_list)
 
-    # Finalize and return
     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
     return BytesIO(pdf_output)
 
