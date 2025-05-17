@@ -631,10 +631,10 @@ def render_pdf_from_data(context):
         pdf.cell(0, 8, f"Twitter: {twitter}", ln=True)
 
     # Output PDF to BytesIO buffer
-    pdf_output = BytesIO()
-    pdf.output(pdf_output)
-    pdf_output.seek(0)
+    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    pdf_output = BytesIO(pdf_bytes)
     return pdf_output
+
 
 
 def get_pdf_download_link(pdf_file):
