@@ -726,7 +726,7 @@ def render_pdf_from_data(context):
     if twitter:
         pdf.cell(0, 8, f"Twitter: {twitter}", ln=True)
 
-    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    pdf_bytes = pdf.output(dest='S').encode('utf-8')
     return BytesIO(pdf_bytes)
 
 
