@@ -414,6 +414,8 @@ import matplotlib.pyplot as plt
 from components.ai_cv_generator import generate_cv_cohere_chat
 import plotly.graph_objects as go
 from dotenv import load_dotenv
+from fpdf import FPDF
+from io import BytesIO
 import base64
 import streamlit.components.v1 as components
 from components.resume_reader import Resume_reader
@@ -542,22 +544,98 @@ load_dotenv()
 #     return output_filename
 
 
-def render_pdf_from_template(template_name, context, output_filename):
-    # Load and render HTML from Jinja2 template
-    env = Environment(loader=FileSystemLoader("templates"))
-    template = env.get_template(template_name)
-    html_content = template.render(context)
+def render_pdf_from_data(context):
+    pdf = FPDF()
+    pdf.add_page()
 
-    # Convert HTML to PDF using xhtml2pdf
-    with open(output_filename, "wb") as result_file:
-        # Convert string HTML to bytes stream
-        pdf_status = pisa.CreatePDF(io.BytesIO(html_content.encode('utf-8')), dest=result_file)
+    # Load Unicode font (font file should be in the same folder or specify full path)
+    pdf.add_font('DejaVu', '', 'DejaVuSans.ttf', uni=True)
+    pdf.set_font("DejaVu", "", 20)
+    pdf.cell(0, 12, txt=context.get("name", "Name"), ln=True, align="C")
 
-    if pdf_status.err:
-        # Raise error with details for debugging
-        raise Exception(f"Failed to generate PDF, error code: {pdf_status.err}")
+    pdf.set_font("DejaVu", "", 12)
+    pdf.cell(0, 10, f"Email: {context.get('email', '')}", ln=True, align="C")
+    pdf.ln(5)
 
-    return output_filename
+    # About Me
+    pdf.set_font("DejaVu", "", 14)
+    pdf.cell(0, 10, "About Me:", ln=True)
+    pdf.set_font("DejaVu", "", 12)
+    pdf.multi_cell(0, 6, context.get("about_me", ""))
+    pdf.ln(5)
+
+    # Skills (simple plain text, multiline or comma separated)
+    skills = context.get("skills", "")
+    if isinstance(skills, list):
+        skills = ", ".join(skills)
+    pdf.set_font("DejaVu", "", 14)
+    pdf.cell(0, 10, "Skills:", ln=True)
+    pdf.set_font("DejaVu", "", 12)
+    pdf.multi_cell(0, 6, skills)
+    pdf.ln(5)
+
+    # Education (multiline text)
+    education = context.get("education", "")
+    if isinstance(education, list):
+        education = "\n".join(education)
+    pdf.set_font("DejaVu", "", 14)
+    pdf.cell(0, 10, "Education:", ln=True)
+    pdf.set_font("DejaVu", "", 12)
+    pdf.multi_cell(0, 6, education)
+    pdf.ln(5)
+
+    # Experience
+    experience = context.get("experience", "")
+    if isinstance(experience, list):
+        experience = "\n".join(experience)
+    pdf.set_font("DejaVu", "", 14)
+    pdf.cell(0, 10, "Experience:", ln=True)
+    pdf.set_font("DejaVu", "", 12)
+    pdf.multi_cell(0, 6, experience)
+    pdf.ln(5)
+
+    # Projects
+    projects = context.get("projects", "")
+    if isinstance(projects, list):
+        projects = "\n".join(projects)
+    pdf.set_font("DejaVu", "", 14)
+    pdf.cell(0, 10, "Projects:", ln=True)
+    pdf.set_font("DejaVu", "", 12)
+    pdf.multi_cell(0, 6, projects)
+    pdf.ln(5)
+
+    # Interests
+    interests = context.get("interests", "")
+    if isinstance(interests, list):
+        interests = ", ".join(interests)
+    pdf.set_font("DejaVu", "", 14)
+    pdf.cell(0, 10, "Interests:", ln=True)
+    pdf.set_font("DejaVu", "", 12)
+    pdf.multi_cell(0, 6, interests)
+    pdf.ln(5)
+
+    # Social Links
+    pdf.set_font("DejaVu", "", 14)
+    pdf.cell(0, 10, "Social Links:", ln=True)
+    pdf.set_font("DejaVu", "", 12)
+    linkedin = context.get("linkedin", "")
+    github = context.get("github", "")
+    twitter = context.get("twitter", "")
+    if linkedin:
+        pdf.cell(0, 6, f"LinkedIn: {linkedin}", ln=True)
+    if github:
+        pdf.cell(0, 6, f"GitHub: {github}", ln=True)
+    if twitter:
+        pdf.cell(0, 6, f"Twitter: {twitter}", ln=True)
+
+    # Output PDF as BytesIO stream (you can save or return it)
+    pdf_output = BytesIO()
+    pdf.output(pdf_output)
+    pdf_output.seek(0)
+    return pdf_output
+
+
+
 
 def get_pdf_download_link(pdf_file):
     with open(pdf_file, "rb") as f:
@@ -1028,12 +1106,16 @@ if uploaded_file:
                         }
 
                         filename = f"{name.replace(' ', '_')}_cv.pdf"
-                        output_path = render_pdf_from_template("template.html", context, filename)
+                        pdf_file = render_pdf_from_data(context)  # This returns BytesIO stream
 
-                        if output_path:
+                        if pdf_file:
                             st.success("✅ CV generated successfully!")
-                            st.markdown(get_pdf_download_link(output_path), unsafe_allow_html=True)
+                            st.download_button(
+                                label="Download Your CV as PDF",
+                                data=pdf_file,
+                                file_name=filename,
+                                mime="application/pdf"
+                            )
                         else:
-                            st.error("❌ Failed to generate CV. Please check template or inputs.")
-
+                            st.error("❌ Failed to generate CV. Please check inputs.")
                 st.info("You're already verified for premium access. Enjoy these tools and stay tuned for updates!")
