@@ -404,10 +404,10 @@ import os
 import time
 import pandas as pd
 from collections import Counter
-from jinja2 import Environment, FileSystemLoader
+# from jinja2 import Environment, FileSystemLoader
 import jinja2
 # from xhtml2pdf import pisa
-from weasyprint import HTML, CSS
+# from weasyprint import HTML, CSS
 import pdfkit
 import stripe
 from wordcloud import WordCloud
