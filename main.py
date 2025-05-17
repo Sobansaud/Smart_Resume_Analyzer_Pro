@@ -990,7 +990,6 @@ load_dotenv()
 #     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
 #     return BytesIO(pdf_output)
 
-
 from fpdf import FPDF
 from io import BytesIO
 import os
@@ -1009,20 +1008,20 @@ def clean_text(text):
 
 def render_pdf_from_data(context):
     pdf = FPDF()
-    pdf.set_auto_page_break(False)
+    pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
 
     epw = pdf.w - 2 * pdf.l_margin
     col_width = epw / 2 - 5
 
-    # Load and set custom font
+    # Font
     font_path = os.path.join(os.path.dirname(__file__), 'DejaVuSans.ttf')
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Font file not found: {font_path}")
     pdf.add_font('DejaVu', '', font_path, uni=True)
     pdf.set_font('DejaVu', '', 12)
 
-    # === Profile Image ===
+    # Profile Image
     image_url = context.get("profile_image_url", "")
     if image_url.startswith("data:image"):
         try:
@@ -1037,24 +1036,24 @@ def render_pdf_from_data(context):
             pass
     pdf.ln(40)
 
-    # === Name and Email ===
+    # Name and Email
     pdf.set_font('DejaVu', '', 22)
-    pdf.set_text_color(30, 30, 30)
+    pdf.set_text_color(0, 0, 80)
     pdf.cell(0, 12, clean_text(context.get("name", "John Doe")), ln=True, align="C")
 
     pdf.set_font('DejaVu', '', 13)
-    pdf.set_text_color(100, 100, 100)
+    pdf.set_text_color(80, 80, 80)
     pdf.cell(0, 8, f"Email: {clean_text(context.get('email', 'johndoe@example.com'))}", ln=True, align="C")
     pdf.ln(8)
 
-    # Vertical separator line
+    # Vertical Line
     top_y = pdf.get_y()
     bottom_y = 285
     pdf.set_draw_color(200, 200, 200)
     pdf.set_line_width(0.4)
     pdf.line(pdf.l_margin + epw / 2, top_y, pdf.l_margin + epw / 2, bottom_y)
 
-    # Section layout
+    # Section Content
     left_sections = [
         ("About Me", context.get("about_me", ""), False),
         ("Skills", context.get("skills", "").split("\n"), True),
@@ -1076,14 +1075,14 @@ def render_pdf_from_data(context):
     x_left = pdf.l_margin
     x_right = pdf.l_margin + epw / 2 + 5
 
-    # Draw section function with styling
+    # Draw section function with better spacing & page break support
     def draw_section(x, y, title, content, is_list):
         pdf.set_xy(x, y)
-        pdf.set_font('DejaVu', '', 14)
-        pdf.set_text_color(0, 0, 80)
-        pdf.cell(col_width, 8, f"{title}", ln=True)
+        pdf.set_font('DejaVu', '', 15)
+        pdf.set_text_color(0, 0, 100)
+        pdf.cell(col_width, 9, f"{title}", ln=True)
         pdf.set_draw_color(220, 220, 220)
-        pdf.set_line_width(0.3)
+        pdf.set_line_width(0.4)
         pdf.line(x, pdf.get_y(), x + col_width, pdf.get_y())
         pdf.ln(2)
 
@@ -1093,23 +1092,24 @@ def render_pdf_from_data(context):
         if is_list and isinstance(content, list):
             for item in content:
                 pdf.set_x(x)
-                pdf.multi_cell(col_width, 5.5, f"• {clean_text(item)}", border=0)
+                pdf.multi_cell(col_width, 6, f"• {clean_text(item)}", border=0)
         else:
             pdf.set_x(x)
-            pdf.multi_cell(col_width, 5.5, clean_text(content), border=0)
+            pdf.multi_cell(col_width, 6, clean_text(content), border=0)
 
-        return pdf.get_y() + 4
+        return pdf.get_y() + 5
 
-    # Render all sections
+    # Render sections
     for title, content, is_list in left_sections:
         y_left = draw_section(x_left, y_left, title, content, is_list)
 
     for title, content, is_list in right_sections:
         y_right = draw_section(x_right, y_right, title, content, is_list)
 
-    # Finalize
+    # Finalize and return
     pdf_output = pdf.output(dest='S').encode('latin1', 'ignore')
     return BytesIO(pdf_output)
+
 
 
 
