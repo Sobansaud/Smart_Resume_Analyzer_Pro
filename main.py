@@ -406,8 +406,8 @@ import pandas as pd
 from collections import Counter
 import jinja2
 import stripe
-from xhtml2pdf import pisa
-from jinja2 import Environment, FileSystemLoader
+# from xhtml2pdf import pisa
+# from jinja2 import Environment, FileSystemLoader
 import io
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
